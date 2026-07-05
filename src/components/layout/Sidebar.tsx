@@ -9,7 +9,14 @@ import {
   UserCircle,
 } from "lucide-react";
 
-const nav = [
+type NavItem = {
+  to: "/" | "/tickets" | "/leave-requests" | "/assets" | "/announcements" | "/meeting-rooms" | "/profile";
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const nav: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/tickets", label: "Tickets", icon: TicketCheck },
   { to: "/leave-requests", label: "Leave Requests", icon: CalendarDays },
@@ -17,7 +24,7 @@ const nav = [
   { to: "/announcements", label: "Announcements", icon: Megaphone },
   { to: "/meeting-rooms", label: "Meeting Rooms", icon: DoorOpen },
   { to: "/profile", label: "Profile", icon: UserCircle },
-] as const;
+];
 
 export function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

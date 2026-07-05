@@ -9,27 +9,226 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
+import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
+import { Route as AppAssetsRouteImport } from './routes/_app.assets'
+import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTicketsRoute = AppTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMeetingRoomsRoute = AppMeetingRoomsRouteImport.update({
+  id: '/meeting-rooms',
+  path: '/meeting-rooms',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeaveRequestsRoute = AppLeaveRequestsRouteImport.update({
+  id: '/leave-requests',
+  path: '/leave-requests',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssetsRoute = AppAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnnouncementsRoute = AppAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AppRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof AppIndexRoute
+  '/login': typeof LoginRoute
+  '/announcements': typeof AppAnnouncementsRoute
+  '/assets': typeof AppAssetsRoute
+  '/leave-requests': typeof AppLeaveRequestsRoute
+  '/meeting-rooms': typeof AppMeetingRoomsRoute
+  '/profile': typeof AppProfileRoute
+  '/tickets': typeof AppTicketsRoute
+}
+export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
+  '/announcements': typeof AppAnnouncementsRoute
+  '/assets': typeof AppAssetsRoute
+  '/leave-requests': typeof AppLeaveRequestsRoute
+  '/meeting-rooms': typeof AppMeetingRoomsRoute
+  '/profile': typeof AppProfileRoute
+  '/tickets': typeof AppTicketsRoute
+  '/': typeof AppIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_app/announcements': typeof AppAnnouncementsRoute
+  '/_app/assets': typeof AppAssetsRoute
+  '/_app/leave-requests': typeof AppLeaveRequestsRoute
+  '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/tickets': typeof AppTicketsRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/announcements'
+    | '/assets'
+    | '/leave-requests'
+    | '/meeting-rooms'
+    | '/profile'
+    | '/tickets'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to:
+    | '/login'
+    | '/announcements'
+    | '/assets'
+    | '/leave-requests'
+    | '/meeting-rooms'
+    | '/profile'
+    | '/tickets'
+    | '/'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/_app/announcements'
+    | '/_app/assets'
+    | '/_app/leave-requests'
+    | '/_app/meeting-rooms'
+    | '/_app/profile'
+    | '/_app/tickets'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tickets': {
+      id: '/_app/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof AppTicketsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/meeting-rooms': {
+      id: '/_app/meeting-rooms'
+      path: '/meeting-rooms'
+      fullPath: '/meeting-rooms'
+      preLoaderRoute: typeof AppMeetingRoomsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leave-requests': {
+      id: '/_app/leave-requests'
+      path: '/leave-requests'
+      fullPath: '/leave-requests'
+      preLoaderRoute: typeof AppLeaveRequestsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assets': {
+      id: '/_app/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AppAssetsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/announcements': {
+      id: '/_app/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AppAnnouncementsRouteImport
+      parentRoute: typeof AppRoute
+    }
+  }
+}
+
+interface AppRouteChildren {
+  AppAnnouncementsRoute: typeof AppAnnouncementsRoute
+  AppAssetsRoute: typeof AppAssetsRoute
+  AppLeaveRequestsRoute: typeof AppLeaveRequestsRoute
+  AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppTicketsRoute: typeof AppTicketsRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnnouncementsRoute: AppAnnouncementsRoute,
+  AppAssetsRoute: AppAssetsRoute,
+  AppLeaveRequestsRoute: AppLeaveRequestsRoute,
+  AppMeetingRoomsRoute: AppMeetingRoomsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppTicketsRoute: AppTicketsRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
