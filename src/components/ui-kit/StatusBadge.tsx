@@ -1,4 +1,4 @@
-type Status = "open" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "active" | "inactive";
+type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "active" | "inactive";
 
 const styles: Record<Status, string> = {
   open: "bg-info/10 text-info",
