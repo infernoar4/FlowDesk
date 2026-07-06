@@ -38,7 +38,7 @@ function BackLink() {
 }
 
 function TicketDetailPage() {
-  const { ticket } = Route.useLoaderData();
+  const { ticket } = Route.useLoaderData() as { ticket: Ticket };
 
   return (
     <div>
