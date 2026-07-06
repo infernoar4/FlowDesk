@@ -45,9 +45,7 @@ function TicketDetailPage() {
       <div className="mb-4"><BackLink /></div>
       <PageHeader
         title={ticket.title}
-        description={
-          <span className="font-mono text-xs">{ticket.id}</span> as unknown as string
-        }
+        description={`Ticket ${ticket.id}`}
         actions={<StatusBadge status={ticket.status} />}
       />
 
