@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
-import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
 import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
@@ -31,11 +30,6 @@ const AppRoute = AppRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppTicketsRoute = AppTicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -72,7 +66,6 @@ export interface FileRoutesByFullPath {
   '/leave-requests': typeof AppLeaveRequestsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
-  '/tickets': typeof AppTicketsRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -81,7 +74,6 @@ export interface FileRoutesByTo {
   '/leave-requests': typeof AppLeaveRequestsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
-  '/tickets': typeof AppTicketsRoute
   '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -93,7 +85,6 @@ export interface FileRoutesById {
   '/_app/leave-requests': typeof AppLeaveRequestsRoute
   '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
   '/_app/profile': typeof AppProfileRoute
-  '/_app/tickets': typeof AppTicketsRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -106,7 +97,6 @@ export interface FileRouteTypes {
     | '/leave-requests'
     | '/meeting-rooms'
     | '/profile'
-    | '/tickets'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -115,7 +105,6 @@ export interface FileRouteTypes {
     | '/leave-requests'
     | '/meeting-rooms'
     | '/profile'
-    | '/tickets'
     | '/'
   id:
     | '__root__'
@@ -126,7 +115,6 @@ export interface FileRouteTypes {
     | '/_app/leave-requests'
     | '/_app/meeting-rooms'
     | '/_app/profile'
-    | '/_app/tickets'
     | '/_app/'
   fileRoutesById: FileRoutesById
 }
@@ -156,13 +144,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/tickets': {
-      id: '/_app/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof AppTicketsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/profile': {
@@ -209,7 +190,6 @@ interface AppRouteChildren {
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRoute
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppTicketsRoute: typeof AppTicketsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -219,7 +199,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppLeaveRequestsRoute: AppLeaveRequestsRoute,
   AppMeetingRoomsRoute: AppMeetingRoomsRoute,
   AppProfileRoute: AppProfileRoute,
-  AppTicketsRoute: AppTicketsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
