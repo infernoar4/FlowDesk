@@ -4,11 +4,11 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
 import { StatusBadge } from "@/components/ui-kit/StatusBadge";
 import { TicketTimeline } from "@/components/tickets/TicketTimeline";
-import { tickets } from "@/data/tickets";
+import { tickets, type Ticket } from "@/data/tickets";
 
 export const Route = createFileRoute("/_app/tickets/$ticketId")({
   head: ({ params }) => ({ meta: [{ title: `${params.ticketId} — FlowDesk` }] }),
-  loader: ({ params }) => {
+  loader: ({ params }): { ticket: Ticket } => {
     const ticket = tickets.find((t) => t.id === params.ticketId);
     if (!ticket) throw notFound();
     return { ticket };
