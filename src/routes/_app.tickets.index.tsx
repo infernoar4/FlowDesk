@@ -1,19 +1,24 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Plus, TicketCheck } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Plus, TicketCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { SearchBar } from "@/components/ui-kit/SearchBar";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
+import { DataTable, type Column } from "@/components/ui-kit/DataTable";
+import { StatusBadge } from "@/components/ui-kit/StatusBadge";
+import { PriorityBadge } from "@/components/tickets/PriorityBadge";
 import { TicketCard } from "@/components/tickets/TicketCard";
 import { TicketFormModal } from "@/components/tickets/TicketFormModal";
 import {
   tickets as allTickets,
   TICKET_CATEGORIES,
   TICKET_STATUSES,
+  type Ticket,
   type TicketCategory,
   type TicketStatus,
 } from "@/data/tickets";
+import { useRole } from "@/context/RoleContext";
 
 export const Route = createFileRoute("/_app/tickets/")({
   head: () => ({ meta: [{ title: "Tickets — FlowDesk" }] }),
@@ -29,6 +34,7 @@ const STATUS_LABELS: Record<TicketStatus, string> = {
 };
 
 function TicketsListPage() {
+  const { role } = useRole();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<TicketStatus | "all">("all");
   const [category, setCategory] = useState<TicketCategory | "all">("all");
@@ -46,15 +52,23 @@ function TicketsListPage() {
     });
   }, [query, status, category]);
 
+  const isSupport = role === "support";
+
   return (
     <div>
       <PageHeader
-        title="Ticket Management"
-        description="Raise workplace issues and follow their progress until resolved."
+        title={isSupport ? "Ticket Queue" : "Ticket Management"}
+        description={
+          isSupport
+            ? "Review incoming tickets, set priority and assign to an engineer."
+            : "Raise workplace issues and follow their progress until resolved."
+        }
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
-            Create Ticket
-          </Button>
+          isSupport ? undefined : (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
+              Create Ticket
+            </Button>
+          )
         }
       />
 
@@ -93,14 +107,22 @@ function TicketsListPage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={<TicketCheck className="h-6 w-6" />}
-          title="No support tickets yet."
-          description="Click Create Ticket to report your first workplace issue."
+          title={isSupport ? "No tickets match your filters." : "No support tickets yet."}
+          description={
+            isSupport
+              ? "Try clearing the filters to see the full queue."
+              : "Click Create Ticket to report your first workplace issue."
+          }
           action={
-            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
-              Create Ticket
-            </Button>
+            isSupport ? undefined : (
+              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
+                Create Ticket
+              </Button>
+            )
           }
         />
+      ) : isSupport ? (
+        <SupportQueueTable tickets={filtered} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((t) => (
@@ -112,4 +134,55 @@ function TicketsListPage() {
       <TicketFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
+}
+
+function SupportQueueTable({ tickets }: { tickets: Ticket[] }) {
+  const columns: Column<Ticket>[] = [
+    {
+      key: "id",
+      header: "Ticket ID",
+      className: "font-mono text-xs text-muted-foreground w-28",
+    },
+    {
+      key: "title",
+      header: "Issue",
+      render: (t) => (
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-foreground truncate">{t.title}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            Reported by {t.reporter}
+          </div>
+        </div>
+      ),
+    },
+    { key: "category", header: "Category", className: "text-sm w-32" },
+    {
+      key: "priority",
+      header: "Priority",
+      className: "w-28",
+      render: (t) => <PriorityBadge priority={t.priority} />,
+    },
+    { key: "createdAt", header: "Created", className: "text-sm text-muted-foreground w-32" },
+    {
+      key: "status",
+      header: "Status",
+      className: "w-32",
+      render: (t) => <StatusBadge status={t.status} />,
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-32 text-right",
+      render: (t) => (
+        <Link
+          to="/tickets/$ticketId"
+          params={{ ticketId: t.id }}
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          Review <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      ),
+    },
+  ];
+  return <DataTable columns={columns} data={tickets} />;
 }
