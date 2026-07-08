@@ -1,7 +1,14 @@
 import { Bell, HelpCircle, Search } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
+import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
 
 export function TopNavbar() {
+  const { role } = useRole();
+  const displayName = role === "support" ? CURRENT_ENGINEER : "Alex Lee";
+  const displayRole = role === "support" ? "Support Engineer" : "Operations";
+  const initials = role === "support" ? "RK" : "AL";
+
   return (
     <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur border-b border-border">
       <div className="h-full px-6 flex items-center justify-between gap-4">
@@ -17,6 +24,7 @@ export function TopNavbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <RoleSwitcher />
           <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
             <HelpCircle className="h-5 w-5" />
           </button>
@@ -29,11 +37,11 @@ export function TopNavbar() {
             className="ml-2 flex items-center gap-2 pl-2 pr-3 h-10 rounded-lg hover:bg-muted transition-colors"
           >
             <div className="h-8 w-8 rounded-full bg-primary-soft text-primary flex items-center justify-center text-sm font-semibold">
-              AL
+              {initials}
             </div>
             <div className="hidden sm:block text-left leading-tight">
-              <div className="text-sm font-medium text-foreground">Alex Lee</div>
-              <div className="text-xs text-muted-foreground">Operations</div>
+              <div className="text-sm font-medium text-foreground">{displayName}</div>
+              <div className="text-xs text-muted-foreground">{displayRole}</div>
             </div>
           </Link>
         </div>
