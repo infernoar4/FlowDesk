@@ -16,6 +16,7 @@ import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
 import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
+import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-tickets'
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
@@ -55,6 +56,11 @@ const AppLeaveRequestsRoute = AppLeaveRequestsRouteImport.update({
   path: '/leave-requests',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssignedTicketsRoute = AppAssignedTicketsRouteImport.update({
+  id: '/assigned-tickets',
+  path: '/assigned-tickets',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAssetsRoute = AppAssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
   '/assets': typeof AppAssetsRoute
+  '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/leave-requests': typeof AppLeaveRequestsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
   '/assets': typeof AppAssetsRoute
+  '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/leave-requests': typeof AppLeaveRequestsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/announcements': typeof AppAnnouncementsRoute
   '/_app/assets': typeof AppAssetsRoute
+  '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
   '/_app/leave-requests': typeof AppLeaveRequestsRoute
   '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
   '/_app/profile': typeof AppProfileRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/announcements'
     | '/assets'
+    | '/assigned-tickets'
     | '/leave-requests'
     | '/meeting-rooms'
     | '/profile'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/announcements'
     | '/assets'
+    | '/assigned-tickets'
     | '/leave-requests'
     | '/meeting-rooms'
     | '/profile'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/announcements'
     | '/_app/assets'
+    | '/_app/assigned-tickets'
     | '/_app/leave-requests'
     | '/_app/meeting-rooms'
     | '/_app/profile'
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLeaveRequestsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assigned-tickets': {
+      id: '/_app/assigned-tickets'
+      path: '/assigned-tickets'
+      fullPath: '/assigned-tickets'
+      preLoaderRoute: typeof AppAssignedTicketsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/assets': {
       id: '/_app/assets'
       path: '/assets'
@@ -256,6 +275,7 @@ const AppTicketsRouteWithChildren = AppTicketsRoute._addFileChildren(
 interface AppRouteChildren {
   AppAnnouncementsRoute: typeof AppAnnouncementsRoute
   AppAssetsRoute: typeof AppAssetsRoute
+  AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRoute
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -266,6 +286,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAnnouncementsRoute: AppAnnouncementsRoute,
   AppAssetsRoute: AppAssetsRoute,
+  AppAssignedTicketsRoute: AppAssignedTicketsRoute,
   AppLeaveRequestsRoute: AppLeaveRequestsRoute,
   AppMeetingRoomsRoute: AppMeetingRoomsRoute,
   AppProfileRoute: AppProfileRoute,
