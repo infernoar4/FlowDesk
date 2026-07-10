@@ -1,4 +1,4 @@
-type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "active" | "inactive";
+type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "cancelled" | "active" | "inactive";
 
 const styles: Record<Status, string> = {
   open: "bg-info/10 text-info",
@@ -9,6 +9,7 @@ const styles: Record<Status, string> = {
   pending: "bg-warning/15 text-warning-foreground",
   approved: "bg-success/15 text-success",
   rejected: "bg-destructive/10 text-destructive",
+  cancelled: "bg-muted text-muted-foreground",
   active: "bg-success/15 text-success",
   inactive: "bg-muted text-muted-foreground",
 };
@@ -22,6 +23,7 @@ const labels: Record<Status, string> = {
   pending: "Pending",
   approved: "Approved",
   rejected: "Rejected",
+  cancelled: "Cancelled",
   active: "Active",
   inactive: "Inactive",
 };
