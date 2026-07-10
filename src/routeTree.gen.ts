@@ -20,7 +20,10 @@ import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-t
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
+import { Route as AppLeaveRequestsIndexRouteImport } from './routes/_app.leave-requests.index'
 import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$ticketId'
+import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-requests.all'
+import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -76,10 +79,25 @@ const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppTicketsRoute,
 } as any)
+const AppLeaveRequestsIndexRoute = AppLeaveRequestsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppLeaveRequestsRoute,
+} as any)
 const AppTicketsTicketIdRoute = AppTicketsTicketIdRouteImport.update({
   id: '/$ticketId',
   path: '/$ticketId',
   getParentRoute: () => AppTicketsRoute,
+} as any)
+const AppLeaveRequestsAllRoute = AppLeaveRequestsAllRouteImport.update({
+  id: '/all',
+  path: '/all',
+  getParentRoute: () => AppLeaveRequestsRoute,
+} as any)
+const AppLeaveRequestsLeaveIdRoute = AppLeaveRequestsLeaveIdRouteImport.update({
+  id: '/$leaveId',
+  path: '/$leaveId',
+  getParentRoute: () => AppLeaveRequestsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -88,11 +106,14 @@ export interface FileRoutesByFullPath {
   '/announcements': typeof AppAnnouncementsRoute
   '/assets': typeof AppAssetsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
-  '/leave-requests': typeof AppLeaveRequestsRoute
+  '/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
   '/tickets': typeof AppTicketsRouteWithChildren
+  '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
+  '/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/leave-requests/': typeof AppLeaveRequestsIndexRoute
   '/tickets/': typeof AppTicketsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -100,11 +121,13 @@ export interface FileRoutesByTo {
   '/announcements': typeof AppAnnouncementsRoute
   '/assets': typeof AppAssetsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
-  '/leave-requests': typeof AppLeaveRequestsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
   '/': typeof AppIndexRoute
+  '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
+  '/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/leave-requests': typeof AppLeaveRequestsIndexRoute
   '/tickets': typeof AppTicketsIndexRoute
 }
 export interface FileRoutesById {
@@ -114,12 +137,15 @@ export interface FileRoutesById {
   '/_app/announcements': typeof AppAnnouncementsRoute
   '/_app/assets': typeof AppAssetsRoute
   '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
-  '/_app/leave-requests': typeof AppLeaveRequestsRoute
+  '/_app/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/tickets': typeof AppTicketsRouteWithChildren
   '/_app/': typeof AppIndexRoute
+  '/_app/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
+  '/_app/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/_app/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/_app/leave-requests/': typeof AppLeaveRequestsIndexRoute
   '/_app/tickets/': typeof AppTicketsIndexRoute
 }
 export interface FileRouteTypes {
@@ -134,7 +160,10 @@ export interface FileRouteTypes {
     | '/meeting-rooms'
     | '/profile'
     | '/tickets'
+    | '/leave-requests/$leaveId'
+    | '/leave-requests/all'
     | '/tickets/$ticketId'
+    | '/leave-requests/'
     | '/tickets/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -142,11 +171,13 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/assets'
     | '/assigned-tickets'
-    | '/leave-requests'
     | '/meeting-rooms'
     | '/profile'
     | '/'
+    | '/leave-requests/$leaveId'
+    | '/leave-requests/all'
     | '/tickets/$ticketId'
+    | '/leave-requests'
     | '/tickets'
   id:
     | '__root__'
@@ -160,7 +191,10 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/tickets'
     | '/_app/'
+    | '/_app/leave-requests/$leaveId'
+    | '/_app/leave-requests/all'
     | '/_app/tickets/$ticketId'
+    | '/_app/leave-requests/'
     | '/_app/tickets/'
   fileRoutesById: FileRoutesById
 }
@@ -248,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTicketsIndexRouteImport
       parentRoute: typeof AppTicketsRoute
     }
+    '/_app/leave-requests/': {
+      id: '/_app/leave-requests/'
+      path: '/'
+      fullPath: '/leave-requests/'
+      preLoaderRoute: typeof AppLeaveRequestsIndexRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
     '/_app/tickets/$ticketId': {
       id: '/_app/tickets/$ticketId'
       path: '/$ticketId'
@@ -255,8 +296,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTicketsTicketIdRouteImport
       parentRoute: typeof AppTicketsRoute
     }
+    '/_app/leave-requests/all': {
+      id: '/_app/leave-requests/all'
+      path: '/all'
+      fullPath: '/leave-requests/all'
+      preLoaderRoute: typeof AppLeaveRequestsAllRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
+    '/_app/leave-requests/$leaveId': {
+      id: '/_app/leave-requests/$leaveId'
+      path: '/$leaveId'
+      fullPath: '/leave-requests/$leaveId'
+      preLoaderRoute: typeof AppLeaveRequestsLeaveIdRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
   }
 }
+
+interface AppLeaveRequestsRouteChildren {
+  AppLeaveRequestsLeaveIdRoute: typeof AppLeaveRequestsLeaveIdRoute
+  AppLeaveRequestsAllRoute: typeof AppLeaveRequestsAllRoute
+  AppLeaveRequestsIndexRoute: typeof AppLeaveRequestsIndexRoute
+}
+
+const AppLeaveRequestsRouteChildren: AppLeaveRequestsRouteChildren = {
+  AppLeaveRequestsLeaveIdRoute: AppLeaveRequestsLeaveIdRoute,
+  AppLeaveRequestsAllRoute: AppLeaveRequestsAllRoute,
+  AppLeaveRequestsIndexRoute: AppLeaveRequestsIndexRoute,
+}
+
+const AppLeaveRequestsRouteWithChildren =
+  AppLeaveRequestsRoute._addFileChildren(AppLeaveRequestsRouteChildren)
 
 interface AppTicketsRouteChildren {
   AppTicketsTicketIdRoute: typeof AppTicketsTicketIdRoute
@@ -276,7 +346,7 @@ interface AppRouteChildren {
   AppAnnouncementsRoute: typeof AppAnnouncementsRoute
   AppAssetsRoute: typeof AppAssetsRoute
   AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
-  AppLeaveRequestsRoute: typeof AppLeaveRequestsRoute
+  AppLeaveRequestsRoute: typeof AppLeaveRequestsRouteWithChildren
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppTicketsRoute: typeof AppTicketsRouteWithChildren
@@ -287,7 +357,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAnnouncementsRoute: AppAnnouncementsRoute,
   AppAssetsRoute: AppAssetsRoute,
   AppAssignedTicketsRoute: AppAssignedTicketsRoute,
-  AppLeaveRequestsRoute: AppLeaveRequestsRoute,
+  AppLeaveRequestsRoute: AppLeaveRequestsRouteWithChildren,
   AppMeetingRoomsRoute: AppMeetingRoomsRoute,
   AppProfileRoute: AppProfileRoute,
   AppTicketsRoute: AppTicketsRouteWithChildren,
