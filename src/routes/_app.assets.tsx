@@ -1,27 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Boxes, Plus } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui-kit/Button";
-import { EmptyState } from "@/components/ui-kit/EmptyState";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { AssetViewProvider } from "@/context/AssetViewContext";
+import { AssetViewSwitcher } from "@/components/assets/AssetViewSwitcher";
 
 export const Route = createFileRoute("/_app/assets")({
-  head: () => ({ meta: [{ title: "Assets — FlowDesk" }] }),
-  component: AssetsPage,
+  head: () => ({ meta: [{ title: "Asset Management — FlowDesk" }] }),
+  component: AssetModuleLayout,
 });
 
-function AssetsPage() {
+function AssetModuleLayout() {
   return (
-    <div>
-      <PageHeader
-        title="Assets"
-        description="Manage hardware, licenses and equipment assigned to your team."
-        actions={<Button leftIcon={<Plus className="h-4 w-4" />}>Add Asset</Button>}
-      />
-      <EmptyState
-        icon={<Boxes className="h-6 w-6" />}
-        title="Asset inventory coming soon"
-        description="The asset registry, assignment history and lifecycle tracking will appear here."
-      />
-    </div>
+    <AssetViewProvider>
+      <div className="flex justify-end mb-4">
+        <AssetViewSwitcher />
+      </div>
+      <Outlet />
+    </AssetViewProvider>
   );
 }
