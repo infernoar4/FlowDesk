@@ -65,12 +65,7 @@ function AssetDetailPage() {
 
       <PageHeader
         title={`${request.category} Request`}
-        description={
-          <span className="flex items-center gap-3">
-            <span className="font-mono text-xs">{request.id}</span>
-            <StatusBadge status={request.status} />
-          </span>
-        }
+        description={`Request ${request.id} submitted by ${request.employee}`}
         actions={<DetailActions
           request={request}
           isSupport={isSupport}
@@ -80,6 +75,11 @@ function AssetDetailPage() {
           onAssign={() => setAssignOpen(true)}
         />}
       />
+
+      <div className="mb-6 flex items-center gap-2">
+        <StatusBadge status={request.status} />
+      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
