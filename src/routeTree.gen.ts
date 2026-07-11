@@ -26,6 +26,7 @@ import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$t
 import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-requests.all'
 import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
 import { Route as AppAssetsAllRouteImport } from './routes/_app.assets.all'
+import { Route as AppAssetsAssetIdRouteImport } from './routes/_app.assets.$assetId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -111,6 +112,11 @@ const AppAssetsAllRoute = AppAssetsAllRouteImport.update({
   path: '/all',
   getParentRoute: () => AppAssetsRoute,
 } as any)
+const AppAssetsAssetIdRoute = AppAssetsAssetIdRouteImport.update({
+  id: '/$assetId',
+  path: '/$assetId',
+  getParentRoute: () => AppAssetsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
   '/tickets': typeof AppTicketsRouteWithChildren
+  '/assets/$assetId': typeof AppAssetsAssetIdRoute
   '/assets/all': typeof AppAssetsAllRoute
   '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/leave-requests/all': typeof AppLeaveRequestsAllRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
   '/': typeof AppIndexRoute
+  '/assets/$assetId': typeof AppAssetsAssetIdRoute
   '/assets/all': typeof AppAssetsAllRoute
   '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/leave-requests/all': typeof AppLeaveRequestsAllRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_app/profile': typeof AppProfileRoute
   '/_app/tickets': typeof AppTicketsRouteWithChildren
   '/_app/': typeof AppIndexRoute
+  '/_app/assets/$assetId': typeof AppAssetsAssetIdRoute
   '/_app/assets/all': typeof AppAssetsAllRoute
   '/_app/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/_app/leave-requests/all': typeof AppLeaveRequestsAllRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/meeting-rooms'
     | '/profile'
     | '/tickets'
+    | '/assets/$assetId'
     | '/assets/all'
     | '/leave-requests/$leaveId'
     | '/leave-requests/all'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/meeting-rooms'
     | '/profile'
     | '/'
+    | '/assets/$assetId'
     | '/assets/all'
     | '/leave-requests/$leaveId'
     | '/leave-requests/all'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/tickets'
     | '/_app/'
+    | '/_app/assets/$assetId'
     | '/_app/assets/all'
     | '/_app/leave-requests/$leaveId'
     | '/_app/leave-requests/all'
@@ -346,15 +358,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsAllRouteImport
       parentRoute: typeof AppAssetsRoute
     }
+    '/_app/assets/$assetId': {
+      id: '/_app/assets/$assetId'
+      path: '/$assetId'
+      fullPath: '/assets/$assetId'
+      preLoaderRoute: typeof AppAssetsAssetIdRouteImport
+      parentRoute: typeof AppAssetsRoute
+    }
   }
 }
 
 interface AppAssetsRouteChildren {
+  AppAssetsAssetIdRoute: typeof AppAssetsAssetIdRoute
   AppAssetsAllRoute: typeof AppAssetsAllRoute
   AppAssetsIndexRoute: typeof AppAssetsIndexRoute
 }
 
 const AppAssetsRouteChildren: AppAssetsRouteChildren = {
+  AppAssetsAssetIdRoute: AppAssetsAssetIdRoute,
   AppAssetsAllRoute: AppAssetsAllRoute,
   AppAssetsIndexRoute: AppAssetsIndexRoute,
 }
