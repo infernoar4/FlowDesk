@@ -21,6 +21,7 @@ import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
 import { Route as AppLeaveRequestsIndexRouteImport } from './routes/_app.leave-requests.index'
+import { Route as AppAssetsIndexRouteImport } from './routes/_app.assets.index'
 import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$ticketId'
 import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-requests.all'
 import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
@@ -84,6 +85,11 @@ const AppLeaveRequestsIndexRoute = AppLeaveRequestsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppLeaveRequestsRoute,
 } as any)
+const AppAssetsIndexRoute = AppAssetsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAssetsRoute,
+} as any)
 const AppTicketsTicketIdRoute = AppTicketsTicketIdRouteImport.update({
   id: '/$ticketId',
   path: '/$ticketId',
@@ -104,7 +110,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
-  '/assets': typeof AppAssetsRoute
+  '/assets': typeof AppAssetsRouteWithChildren
   '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/meeting-rooms': typeof AppMeetingRoomsRoute
@@ -113,13 +119,13 @@ export interface FileRoutesByFullPath {
   '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/assets/': typeof AppAssetsIndexRoute
   '/leave-requests/': typeof AppLeaveRequestsIndexRoute
   '/tickets/': typeof AppTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
-  '/assets': typeof AppAssetsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
@@ -127,6 +133,7 @@ export interface FileRoutesByTo {
   '/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/assets': typeof AppAssetsIndexRoute
   '/leave-requests': typeof AppLeaveRequestsIndexRoute
   '/tickets': typeof AppTicketsIndexRoute
 }
@@ -135,7 +142,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/announcements': typeof AppAnnouncementsRoute
-  '/_app/assets': typeof AppAssetsRoute
+  '/_app/assets': typeof AppAssetsRouteWithChildren
   '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
   '/_app/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
@@ -145,6 +152,7 @@ export interface FileRoutesById {
   '/_app/leave-requests/$leaveId': typeof AppLeaveRequestsLeaveIdRoute
   '/_app/leave-requests/all': typeof AppLeaveRequestsAllRoute
   '/_app/tickets/$ticketId': typeof AppTicketsTicketIdRoute
+  '/_app/assets/': typeof AppAssetsIndexRoute
   '/_app/leave-requests/': typeof AppLeaveRequestsIndexRoute
   '/_app/tickets/': typeof AppTicketsIndexRoute
 }
@@ -163,13 +171,13 @@ export interface FileRouteTypes {
     | '/leave-requests/$leaveId'
     | '/leave-requests/all'
     | '/tickets/$ticketId'
+    | '/assets/'
     | '/leave-requests/'
     | '/tickets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/announcements'
-    | '/assets'
     | '/assigned-tickets'
     | '/meeting-rooms'
     | '/profile'
@@ -177,6 +185,7 @@ export interface FileRouteTypes {
     | '/leave-requests/$leaveId'
     | '/leave-requests/all'
     | '/tickets/$ticketId'
+    | '/assets'
     | '/leave-requests'
     | '/tickets'
   id:
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/_app/leave-requests/$leaveId'
     | '/_app/leave-requests/all'
     | '/_app/tickets/$ticketId'
+    | '/_app/assets/'
     | '/_app/leave-requests/'
     | '/_app/tickets/'
   fileRoutesById: FileRoutesById
@@ -289,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLeaveRequestsIndexRouteImport
       parentRoute: typeof AppLeaveRequestsRoute
     }
+    '/_app/assets/': {
+      id: '/_app/assets/'
+      path: '/'
+      fullPath: '/assets/'
+      preLoaderRoute: typeof AppAssetsIndexRouteImport
+      parentRoute: typeof AppAssetsRoute
+    }
     '/_app/tickets/$ticketId': {
       id: '/_app/tickets/$ticketId'
       path: '/$ticketId'
@@ -312,6 +329,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppAssetsRouteChildren {
+  AppAssetsIndexRoute: typeof AppAssetsIndexRoute
+}
+
+const AppAssetsRouteChildren: AppAssetsRouteChildren = {
+  AppAssetsIndexRoute: AppAssetsIndexRoute,
+}
+
+const AppAssetsRouteWithChildren = AppAssetsRoute._addFileChildren(
+  AppAssetsRouteChildren,
+)
 
 interface AppLeaveRequestsRouteChildren {
   AppLeaveRequestsLeaveIdRoute: typeof AppLeaveRequestsLeaveIdRoute
@@ -344,7 +373,7 @@ const AppTicketsRouteWithChildren = AppTicketsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAnnouncementsRoute: typeof AppAnnouncementsRoute
-  AppAssetsRoute: typeof AppAssetsRoute
+  AppAssetsRoute: typeof AppAssetsRouteWithChildren
   AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRouteWithChildren
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
@@ -355,7 +384,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAnnouncementsRoute: AppAnnouncementsRoute,
-  AppAssetsRoute: AppAssetsRoute,
+  AppAssetsRoute: AppAssetsRouteWithChildren,
   AppAssignedTicketsRoute: AppAssignedTicketsRoute,
   AppLeaveRequestsRoute: AppLeaveRequestsRouteWithChildren,
   AppMeetingRoomsRoute: AppMeetingRoomsRoute,
