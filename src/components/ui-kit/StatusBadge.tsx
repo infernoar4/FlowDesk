@@ -1,4 +1,4 @@
-type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "cancelled" | "active" | "inactive";
+type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "cancelled" | "active" | "inactive" | "return_requested" | "returned";
 
 const styles: Record<Status, string> = {
   open: "bg-info/10 text-info",
@@ -12,6 +12,8 @@ const styles: Record<Status, string> = {
   cancelled: "bg-muted text-muted-foreground",
   active: "bg-success/15 text-success",
   inactive: "bg-muted text-muted-foreground",
+  return_requested: "bg-warning/15 text-warning-foreground",
+  returned: "bg-muted text-muted-foreground",
 };
 
 const labels: Record<Status, string> = {
@@ -26,6 +28,8 @@ const labels: Record<Status, string> = {
   cancelled: "Cancelled",
   active: "Active",
   inactive: "Inactive",
+  return_requested: "Return Requested",
+  returned: "Returned",
 };
 
 export function StatusBadge({ status }: { status: Status }) {
