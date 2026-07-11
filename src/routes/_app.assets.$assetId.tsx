@@ -20,16 +20,8 @@ import { useAssetView } from "@/context/AssetViewContext";
 import { assets, CURRENT_EMPLOYEE, type AssetRequest } from "@/data/assets";
 
 export const Route = createFileRoute("/_app/assets/$assetId")({
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.id} · Asset Request — FlowDesk`
-          : "Asset Request — FlowDesk",
-      },
-    ],
-  }),
-  loader: ({ params }) => {
+  head: () => ({ meta: [{ title: "Asset Request — FlowDesk" }] }),
+  loader: ({ params }): AssetRequest => {
     const req = assets.find((a) => a.id === params.assetId);
     if (!req) throw notFound();
     return req;
