@@ -117,7 +117,7 @@ function RoomDetailsPage() {
               <div className="sm:col-span-2">
                 <dt className="text-xs text-muted-foreground">Equipment</dt>
                 <dd className="mt-2 flex flex-wrap gap-1.5">
-                  {room.equipment.map((e) => (
+                  {room.equipment.map((e: string) => (
                     <span
                       key={e}
                       className="inline-flex items-center rounded-md bg-primary-soft text-primary px-2 py-0.5 text-xs font-medium"
@@ -171,7 +171,7 @@ function RoomDetailsPage() {
             <DashboardCard title="Maintenance History">
               {room.maintenanceLog && room.maintenanceLog.length > 0 ? (
                 <ul className="space-y-3">
-                  {room.maintenanceLog.map((m, i) => (
+                  {room.maintenanceLog.map((m: any, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary-soft text-primary flex items-center justify-center shrink-0">
                         <Wrench className="h-4 w-4" />

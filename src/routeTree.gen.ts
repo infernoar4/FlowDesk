@@ -20,6 +20,7 @@ import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-t
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
+import { Route as AppMeetingRoomsIndexRouteImport } from './routes/_app.meeting-rooms.index'
 import { Route as AppLeaveRequestsIndexRouteImport } from './routes/_app.leave-requests.index'
 import { Route as AppAssetsIndexRouteImport } from './routes/_app.assets.index'
 import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$ticketId'
@@ -27,6 +28,10 @@ import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-req
 import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
 import { Route as AppAssetsAllRouteImport } from './routes/_app.assets.all'
 import { Route as AppAssetsAssetIdRouteImport } from './routes/_app.assets.$assetId'
+import { Route as AppMeetingRoomsRoomsIndexRouteImport } from './routes/_app.meeting-rooms.rooms.index'
+import { Route as AppMeetingRoomsBookingsIndexRouteImport } from './routes/_app.meeting-rooms.bookings.index'
+import { Route as AppMeetingRoomsRoomsRoomIdRouteImport } from './routes/_app.meeting-rooms.rooms.$roomId'
+import { Route as AppMeetingRoomsBookingsBookingIdRouteImport } from './routes/_app.meeting-rooms.bookings.$bookingId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -82,6 +87,11 @@ const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppTicketsRoute,
 } as any)
+const AppMeetingRoomsIndexRoute = AppMeetingRoomsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppMeetingRoomsRoute,
+} as any)
 const AppLeaveRequestsIndexRoute = AppLeaveRequestsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -117,6 +127,30 @@ const AppAssetsAssetIdRoute = AppAssetsAssetIdRouteImport.update({
   path: '/$assetId',
   getParentRoute: () => AppAssetsRoute,
 } as any)
+const AppMeetingRoomsRoomsIndexRoute =
+  AppMeetingRoomsRoomsIndexRouteImport.update({
+    id: '/rooms/',
+    path: '/rooms/',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
+const AppMeetingRoomsBookingsIndexRoute =
+  AppMeetingRoomsBookingsIndexRouteImport.update({
+    id: '/bookings/',
+    path: '/bookings/',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
+const AppMeetingRoomsRoomsRoomIdRoute =
+  AppMeetingRoomsRoomsRoomIdRouteImport.update({
+    id: '/rooms/$roomId',
+    path: '/rooms/$roomId',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
+const AppMeetingRoomsBookingsBookingIdRoute =
+  AppMeetingRoomsBookingsBookingIdRouteImport.update({
+    id: '/bookings/$bookingId',
+    path: '/bookings/$bookingId',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -125,7 +159,7 @@ export interface FileRoutesByFullPath {
   '/assets': typeof AppAssetsRouteWithChildren
   '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/leave-requests': typeof AppLeaveRequestsRouteWithChildren
-  '/meeting-rooms': typeof AppMeetingRoomsRoute
+  '/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
   '/profile': typeof AppProfileRoute
   '/tickets': typeof AppTicketsRouteWithChildren
   '/assets/$assetId': typeof AppAssetsAssetIdRoute
@@ -135,13 +169,17 @@ export interface FileRoutesByFullPath {
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
   '/assets/': typeof AppAssetsIndexRoute
   '/leave-requests/': typeof AppLeaveRequestsIndexRoute
+  '/meeting-rooms/': typeof AppMeetingRoomsIndexRoute
   '/tickets/': typeof AppTicketsIndexRoute
+  '/meeting-rooms/bookings/$bookingId': typeof AppMeetingRoomsBookingsBookingIdRoute
+  '/meeting-rooms/rooms/$roomId': typeof AppMeetingRoomsRoomsRoomIdRoute
+  '/meeting-rooms/bookings/': typeof AppMeetingRoomsBookingsIndexRoute
+  '/meeting-rooms/rooms/': typeof AppMeetingRoomsRoomsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
-  '/meeting-rooms': typeof AppMeetingRoomsRoute
   '/profile': typeof AppProfileRoute
   '/': typeof AppIndexRoute
   '/assets/$assetId': typeof AppAssetsAssetIdRoute
@@ -151,7 +189,12 @@ export interface FileRoutesByTo {
   '/tickets/$ticketId': typeof AppTicketsTicketIdRoute
   '/assets': typeof AppAssetsIndexRoute
   '/leave-requests': typeof AppLeaveRequestsIndexRoute
+  '/meeting-rooms': typeof AppMeetingRoomsIndexRoute
   '/tickets': typeof AppTicketsIndexRoute
+  '/meeting-rooms/bookings/$bookingId': typeof AppMeetingRoomsBookingsBookingIdRoute
+  '/meeting-rooms/rooms/$roomId': typeof AppMeetingRoomsRoomsRoomIdRoute
+  '/meeting-rooms/bookings': typeof AppMeetingRoomsBookingsIndexRoute
+  '/meeting-rooms/rooms': typeof AppMeetingRoomsRoomsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,7 +204,7 @@ export interface FileRoutesById {
   '/_app/assets': typeof AppAssetsRouteWithChildren
   '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
   '/_app/leave-requests': typeof AppLeaveRequestsRouteWithChildren
-  '/_app/meeting-rooms': typeof AppMeetingRoomsRoute
+  '/_app/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
   '/_app/profile': typeof AppProfileRoute
   '/_app/tickets': typeof AppTicketsRouteWithChildren
   '/_app/': typeof AppIndexRoute
@@ -172,7 +215,12 @@ export interface FileRoutesById {
   '/_app/tickets/$ticketId': typeof AppTicketsTicketIdRoute
   '/_app/assets/': typeof AppAssetsIndexRoute
   '/_app/leave-requests/': typeof AppLeaveRequestsIndexRoute
+  '/_app/meeting-rooms/': typeof AppMeetingRoomsIndexRoute
   '/_app/tickets/': typeof AppTicketsIndexRoute
+  '/_app/meeting-rooms/bookings/$bookingId': typeof AppMeetingRoomsBookingsBookingIdRoute
+  '/_app/meeting-rooms/rooms/$roomId': typeof AppMeetingRoomsRoomsRoomIdRoute
+  '/_app/meeting-rooms/bookings/': typeof AppMeetingRoomsBookingsIndexRoute
+  '/_app/meeting-rooms/rooms/': typeof AppMeetingRoomsRoomsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,13 +241,17 @@ export interface FileRouteTypes {
     | '/tickets/$ticketId'
     | '/assets/'
     | '/leave-requests/'
+    | '/meeting-rooms/'
     | '/tickets/'
+    | '/meeting-rooms/bookings/$bookingId'
+    | '/meeting-rooms/rooms/$roomId'
+    | '/meeting-rooms/bookings/'
+    | '/meeting-rooms/rooms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/announcements'
     | '/assigned-tickets'
-    | '/meeting-rooms'
     | '/profile'
     | '/'
     | '/assets/$assetId'
@@ -209,7 +261,12 @@ export interface FileRouteTypes {
     | '/tickets/$ticketId'
     | '/assets'
     | '/leave-requests'
+    | '/meeting-rooms'
     | '/tickets'
+    | '/meeting-rooms/bookings/$bookingId'
+    | '/meeting-rooms/rooms/$roomId'
+    | '/meeting-rooms/bookings'
+    | '/meeting-rooms/rooms'
   id:
     | '__root__'
     | '/_app'
@@ -229,7 +286,12 @@ export interface FileRouteTypes {
     | '/_app/tickets/$ticketId'
     | '/_app/assets/'
     | '/_app/leave-requests/'
+    | '/_app/meeting-rooms/'
     | '/_app/tickets/'
+    | '/_app/meeting-rooms/bookings/$bookingId'
+    | '/_app/meeting-rooms/rooms/$roomId'
+    | '/_app/meeting-rooms/bookings/'
+    | '/_app/meeting-rooms/rooms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTicketsIndexRouteImport
       parentRoute: typeof AppTicketsRoute
     }
+    '/_app/meeting-rooms/': {
+      id: '/_app/meeting-rooms/'
+      path: '/'
+      fullPath: '/meeting-rooms/'
+      preLoaderRoute: typeof AppMeetingRoomsIndexRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
     '/_app/leave-requests/': {
       id: '/_app/leave-requests/'
       path: '/'
@@ -365,6 +434,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsAssetIdRouteImport
       parentRoute: typeof AppAssetsRoute
     }
+    '/_app/meeting-rooms/rooms/': {
+      id: '/_app/meeting-rooms/rooms/'
+      path: '/rooms'
+      fullPath: '/meeting-rooms/rooms/'
+      preLoaderRoute: typeof AppMeetingRoomsRoomsIndexRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/meeting-rooms/bookings/': {
+      id: '/_app/meeting-rooms/bookings/'
+      path: '/bookings'
+      fullPath: '/meeting-rooms/bookings/'
+      preLoaderRoute: typeof AppMeetingRoomsBookingsIndexRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/meeting-rooms/rooms/$roomId': {
+      id: '/_app/meeting-rooms/rooms/$roomId'
+      path: '/rooms/$roomId'
+      fullPath: '/meeting-rooms/rooms/$roomId'
+      preLoaderRoute: typeof AppMeetingRoomsRoomsRoomIdRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/meeting-rooms/bookings/$bookingId': {
+      id: '/_app/meeting-rooms/bookings/$bookingId'
+      path: '/bookings/$bookingId'
+      fullPath: '/meeting-rooms/bookings/$bookingId'
+      preLoaderRoute: typeof AppMeetingRoomsBookingsBookingIdRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
   }
 }
 
@@ -399,6 +496,26 @@ const AppLeaveRequestsRouteChildren: AppLeaveRequestsRouteChildren = {
 const AppLeaveRequestsRouteWithChildren =
   AppLeaveRequestsRoute._addFileChildren(AppLeaveRequestsRouteChildren)
 
+interface AppMeetingRoomsRouteChildren {
+  AppMeetingRoomsIndexRoute: typeof AppMeetingRoomsIndexRoute
+  AppMeetingRoomsBookingsBookingIdRoute: typeof AppMeetingRoomsBookingsBookingIdRoute
+  AppMeetingRoomsRoomsRoomIdRoute: typeof AppMeetingRoomsRoomsRoomIdRoute
+  AppMeetingRoomsBookingsIndexRoute: typeof AppMeetingRoomsBookingsIndexRoute
+  AppMeetingRoomsRoomsIndexRoute: typeof AppMeetingRoomsRoomsIndexRoute
+}
+
+const AppMeetingRoomsRouteChildren: AppMeetingRoomsRouteChildren = {
+  AppMeetingRoomsIndexRoute: AppMeetingRoomsIndexRoute,
+  AppMeetingRoomsBookingsBookingIdRoute: AppMeetingRoomsBookingsBookingIdRoute,
+  AppMeetingRoomsRoomsRoomIdRoute: AppMeetingRoomsRoomsRoomIdRoute,
+  AppMeetingRoomsBookingsIndexRoute: AppMeetingRoomsBookingsIndexRoute,
+  AppMeetingRoomsRoomsIndexRoute: AppMeetingRoomsRoomsIndexRoute,
+}
+
+const AppMeetingRoomsRouteWithChildren = AppMeetingRoomsRoute._addFileChildren(
+  AppMeetingRoomsRouteChildren,
+)
+
 interface AppTicketsRouteChildren {
   AppTicketsTicketIdRoute: typeof AppTicketsTicketIdRoute
   AppTicketsIndexRoute: typeof AppTicketsIndexRoute
@@ -418,7 +535,7 @@ interface AppRouteChildren {
   AppAssetsRoute: typeof AppAssetsRouteWithChildren
   AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRouteWithChildren
-  AppMeetingRoomsRoute: typeof AppMeetingRoomsRoute
+  AppMeetingRoomsRoute: typeof AppMeetingRoomsRouteWithChildren
   AppProfileRoute: typeof AppProfileRoute
   AppTicketsRoute: typeof AppTicketsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
@@ -429,7 +546,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAssetsRoute: AppAssetsRouteWithChildren,
   AppAssignedTicketsRoute: AppAssignedTicketsRoute,
   AppLeaveRequestsRoute: AppLeaveRequestsRouteWithChildren,
-  AppMeetingRoomsRoute: AppMeetingRoomsRoute,
+  AppMeetingRoomsRoute: AppMeetingRoomsRouteWithChildren,
   AppProfileRoute: AppProfileRoute,
   AppTicketsRoute: AppTicketsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
