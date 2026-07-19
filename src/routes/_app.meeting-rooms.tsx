@@ -1,27 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DoorOpen, Plus } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui-kit/Button";
-import { EmptyState } from "@/components/ui-kit/EmptyState";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { MeetingRoomViewProvider } from "@/context/MeetingRoomViewContext";
+import { MeetingRoomViewSwitcher } from "@/components/meeting-rooms/MeetingRoomViewSwitcher";
 
 export const Route = createFileRoute("/_app/meeting-rooms")({
   head: () => ({ meta: [{ title: "Meeting Rooms — FlowDesk" }] }),
-  component: RoomsPage,
+  component: MeetingRoomsLayout,
 });
 
-function RoomsPage() {
+function MeetingRoomsLayout() {
   return (
-    <div>
-      <PageHeader
-        title="Meeting Rooms"
-        description="Browse availability and book rooms across offices."
-        actions={<Button leftIcon={<Plus className="h-4 w-4" />}>Book Room</Button>}
-      />
-      <EmptyState
-        icon={<DoorOpen className="h-6 w-6" />}
-        title="Room booking coming soon"
-        description="Room calendars, capacity filters and instant booking will appear here."
-      />
-    </div>
+    <MeetingRoomViewProvider>
+      <div className="flex justify-end mb-4">
+        <MeetingRoomViewSwitcher />
+      </div>
+      <Outlet />
+    </MeetingRoomViewProvider>
   );
 }
