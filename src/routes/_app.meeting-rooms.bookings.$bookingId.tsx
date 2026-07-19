@@ -148,7 +148,7 @@ function BookingDetailsPage() {
                 <div className="text-xs text-muted-foreground">{room.floor}</div>
                 <div className="text-xs text-muted-foreground">Seats {room.capacity}</div>
                 <div className="pt-2 flex flex-wrap gap-1.5">
-                  {room.equipment.map((e) => (
+                  {room.equipment.map((e: string) => (
                     <span
                       key={e}
                       className="inline-flex items-center rounded-md bg-primary-soft text-primary px-2 py-0.5 text-xs font-medium"
