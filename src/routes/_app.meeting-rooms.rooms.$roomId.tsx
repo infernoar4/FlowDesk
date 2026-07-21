@@ -193,13 +193,13 @@ function RoomDetailsPage() {
         <aside className="space-y-6">
           <DashboardCard title="Current Status">
             <div className="flex items-center justify-between">
-              <RoomStatusBadge status={room.status} />
+              <RoomStatusBadge status={effectiveStatus} />
               <span className="text-xs text-muted-foreground">{room.id}</span>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              {room.status === "maintenance"
+              {effectiveStatus === "maintenance"
                 ? "This room is temporarily unavailable for bookings."
-                : room.status === "occupied"
+                : effectiveStatus === "occupied"
                 ? "This room is currently in use."
                 : "This room can be booked right now."}
             </p>
