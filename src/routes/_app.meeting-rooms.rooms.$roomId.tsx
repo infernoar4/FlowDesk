@@ -74,18 +74,9 @@ function RoomDetailsPage() {
         description={room.description}
         actions={
           isSupport ? (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
-                Edit Room
-              </Button>
-              {room.status === "maintenance" ? (
-                <Button leftIcon={<PlayCircle className="h-4 w-4" />}>Resume Service</Button>
-              ) : (
-                <Button variant="outline" leftIcon={<Wrench className="h-4 w-4" />}>
-                  Mark Under Maintenance
-                </Button>
-              )}
-            </div>
+            <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
+              Edit Room
+            </Button>
           ) : (
             <Button onClick={() => setBookOpen(true)} disabled={disabled}>
               {disabled ? "Booking Unavailable" : "Book Room"}
@@ -95,7 +86,7 @@ function RoomDetailsPage() {
       />
 
       <div className="mb-6 flex items-center gap-2">
-        <RoomStatusBadge status={room.status} />
+        <RoomStatusBadge status={effectiveStatus} />
         <span className="text-xs text-muted-foreground">Room ID · {room.id}</span>
       </div>
 
