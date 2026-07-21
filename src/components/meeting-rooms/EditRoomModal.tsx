@@ -120,6 +120,35 @@ export function EditRoomModal({ open, onClose, room }: Props) {
               className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring resize-none"
             />
           </div>
+          <div>
+            <label className="text-xs font-medium text-foreground">Room Status</label>
+            <div className="mt-2 flex items-center gap-2">
+              {([
+                { value: "available", label: "Available" },
+                { value: "maintenance", label: "Under Maintenance" },
+              ] as { value: EditableStatus; label: string }[]).map((opt) => {
+                const active = status === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setStatus(opt.value)}
+                    className={[
+                      "px-3 h-9 rounded-md text-xs font-medium border transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-foreground border-border hover:bg-muted",
+                    ].join(" ")}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              "Occupied" is set automatically when the room has an active booking.
+            </p>
+          </div>
 
           {error && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs px-3 py-2">
