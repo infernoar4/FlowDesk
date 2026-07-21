@@ -19,6 +19,7 @@ import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { useRole } from "@/context/RoleContext";
 import {
   bookings,
+  computeRoomStatus,
   CURRENT_EMPLOYEE,
   CURRENT_SUPPORT,
   formatDate,
