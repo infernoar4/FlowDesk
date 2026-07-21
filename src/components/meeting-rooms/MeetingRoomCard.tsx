@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Users } from "lucide-react";
-import type { Room } from "@/data/rooms";
+import { computeRoomStatus, type Room } from "@/data/rooms";
 import { RoomStatusBadge } from "./RoomStatusBadge";
 import { Button } from "@/components/ui-kit/Button";
 
