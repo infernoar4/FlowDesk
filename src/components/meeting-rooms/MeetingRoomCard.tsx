@@ -22,7 +22,7 @@ export function MeetingRoomCard({ room, supportActions }: Props) {
             {room.floor}
           </div>
         </div>
-        <RoomStatusBadge status={room.status} />
+        <RoomStatusBadge status={computeRoomStatus(room)} />
       </div>
 
       <div className="flex items-center gap-2 text-sm text-foreground">
