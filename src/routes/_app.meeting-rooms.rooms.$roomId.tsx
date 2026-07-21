@@ -57,7 +57,9 @@ function RoomDetailsPage() {
     [room.id],
   );
   const today = upcoming.filter((b) => b.date === TODAY_ISO);
-  const disabled = room.status === "maintenance";
+  const effectiveStatus = computeRoomStatus(room);
+  const disabled = effectiveStatus === "maintenance";
+
 
   return (
     <div>
