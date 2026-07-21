@@ -8,7 +8,7 @@ import { RoomStatusBadge } from "@/components/meeting-rooms/RoomStatusBadge";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   formatDate,
   formatTimeRange,
@@ -42,7 +42,8 @@ function RoomNotFound() {
 
 function RoomDetailsPage() {
   const room = Route.useLoaderData();
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const isSupport = view === "support";
   const [bookOpen, setBookOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);

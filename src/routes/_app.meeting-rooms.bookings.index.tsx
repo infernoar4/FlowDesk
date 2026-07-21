@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/ui-kit/SearchBar";
 import { DataTable, type Column } from "@/components/ui-kit/DataTable";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   BOOKING_STATUS_LABELS,
   bookings as allBookings,
@@ -46,7 +46,8 @@ function toRow(b: Booking): Row {
 }
 
 function BookingsPage() {
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const isSupport = view === "support";
 
   const [query, setQuery] = useState("");

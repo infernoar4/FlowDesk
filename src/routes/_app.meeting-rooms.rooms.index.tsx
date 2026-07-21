@@ -6,7 +6,7 @@ import { Button } from "@/components/ui-kit/Button";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { MeetingRoomCard } from "@/components/meeting-rooms/MeetingRoomCard";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   EQUIPMENT_OPTIONS,
   ROOM_STATUS_LABELS,
@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_app/meeting-rooms/rooms/")({
 });
 
 function RoomsPage() {
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const isSupport = view === "support";
 
   const [query, setQuery] = useState("");
