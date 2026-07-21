@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui-kit/Button";
-import { EQUIPMENT_OPTIONS, type Equipment, type Room } from "@/data/rooms";
+import { EQUIPMENT_OPTIONS, type Equipment, type Room, type RoomStatus } from "@/data/rooms";
 
 interface Props {
   open: boolean;
@@ -9,12 +9,18 @@ interface Props {
   room: Room;
 }
 
+/** Editable statuses. "occupied" is derived from active bookings and cannot be set manually. */
+type EditableStatus = Exclude<RoomStatus, "occupied">;
+
 export function EditRoomModal({ open, onClose, room }: Props) {
   const [name, setName] = useState(room.name);
   const [floor, setFloor] = useState(room.floor);
   const [capacity, setCapacity] = useState(String(room.capacity));
   const [equipment, setEquipment] = useState<Equipment[]>(room.equipment);
   const [description, setDescription] = useState(room.description);
+  const [status, setStatus] = useState<EditableStatus>(
+    room.status === "occupied" ? "available" : (room.status as EditableStatus),
+  );
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
