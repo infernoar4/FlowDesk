@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, MapPin, Users, Wrench, Pencil, PlayCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Wrench, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
