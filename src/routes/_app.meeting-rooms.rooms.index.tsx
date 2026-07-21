@@ -138,12 +138,13 @@ function RoomsPage() {
                     <Button size="sm" variant="outline" onClick={() => setEditRoom(room)}>
                       Edit Room
                     </Button>
-                    <a
-                      href={`/meeting-rooms/rooms/${room.id}`}
+                    <Link
+                      to="/meeting-rooms/rooms/$roomId"
+                      params={{ roomId: room.id }}
                       className="text-xs font-medium text-primary hover:underline px-2"
                     >
                       Details
-                    </a>
+                    </Link>
                   </div>
                 ) : undefined
               }
