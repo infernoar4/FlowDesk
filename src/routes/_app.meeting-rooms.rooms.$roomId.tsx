@@ -10,6 +10,7 @@ import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
 import { useRole } from "@/context/RoleContext";
 import {
+  computeRoomStatus,
   formatDate,
   formatTimeRange,
   roomBookings,
