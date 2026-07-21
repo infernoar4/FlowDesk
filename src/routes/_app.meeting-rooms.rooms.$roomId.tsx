@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, MapPin, Users, Wrench, Pencil, PlayCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Wrench, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
@@ -8,8 +8,9 @@ import { RoomStatusBadge } from "@/components/meeting-rooms/RoomStatusBadge";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
+  computeRoomStatus,
   formatDate,
   formatTimeRange,
   roomBookings,
@@ -42,7 +43,8 @@ function RoomNotFound() {
 
 function RoomDetailsPage() {
   const room = Route.useLoaderData();
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const isSupport = view === "support";
   const [bookOpen, setBookOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -55,7 +57,9 @@ function RoomDetailsPage() {
     [room.id],
   );
   const today = upcoming.filter((b) => b.date === TODAY_ISO);
-  const disabled = room.status === "maintenance";
+  const effectiveStatus = computeRoomStatus(room);
+  const disabled = effectiveStatus === "maintenance";
+
 
   return (
     <div>
@@ -73,18 +77,9 @@ function RoomDetailsPage() {
         description={room.description}
         actions={
           isSupport ? (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
-                Edit Room
-              </Button>
-              {room.status === "maintenance" ? (
-                <Button leftIcon={<PlayCircle className="h-4 w-4" />}>Resume Service</Button>
-              ) : (
-                <Button variant="outline" leftIcon={<Wrench className="h-4 w-4" />}>
-                  Mark Under Maintenance
-                </Button>
-              )}
-            </div>
+            <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
+              Edit Room
+            </Button>
           ) : (
             <Button onClick={() => setBookOpen(true)} disabled={disabled}>
               {disabled ? "Booking Unavailable" : "Book Room"}
@@ -94,7 +89,7 @@ function RoomDetailsPage() {
       />
 
       <div className="mb-6 flex items-center gap-2">
-        <RoomStatusBadge status={room.status} />
+        <RoomStatusBadge status={effectiveStatus} />
         <span className="text-xs text-muted-foreground">Room ID · {room.id}</span>
       </div>
 
@@ -198,13 +193,13 @@ function RoomDetailsPage() {
         <aside className="space-y-6">
           <DashboardCard title="Current Status">
             <div className="flex items-center justify-between">
-              <RoomStatusBadge status={room.status} />
+              <RoomStatusBadge status={effectiveStatus} />
               <span className="text-xs text-muted-foreground">{room.id}</span>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              {room.status === "maintenance"
+              {effectiveStatus === "maintenance"
                 ? "This room is temporarily unavailable for bookings."
-                : room.status === "occupied"
+                : effectiveStatus === "occupied"
                 ? "This room is currently in use."
                 : "This room can be booked right now."}
             </p>

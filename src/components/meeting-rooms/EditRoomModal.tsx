@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui-kit/Button";
-import { EQUIPMENT_OPTIONS, type Equipment, type Room } from "@/data/rooms";
+import { EQUIPMENT_OPTIONS, type Equipment, type Room, type RoomStatus } from "@/data/rooms";
 
 interface Props {
   open: boolean;
@@ -9,12 +9,18 @@ interface Props {
   room: Room;
 }
 
+/** Editable statuses. "occupied" is derived from active bookings and cannot be set manually. */
+type EditableStatus = Exclude<RoomStatus, "occupied">;
+
 export function EditRoomModal({ open, onClose, room }: Props) {
   const [name, setName] = useState(room.name);
   const [floor, setFloor] = useState(room.floor);
   const [capacity, setCapacity] = useState(String(room.capacity));
   const [equipment, setEquipment] = useState<Equipment[]>(room.equipment);
   const [description, setDescription] = useState(room.description);
+  const [status, setStatus] = useState<EditableStatus>(
+    room.status === "occupied" ? "available" : (room.status as EditableStatus),
+  );
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
@@ -113,6 +119,35 @@ export function EditRoomModal({ open, onClose, room }: Props) {
               rows={3}
               className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring resize-none"
             />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-foreground">Room Status</label>
+            <div className="mt-2 flex items-center gap-2">
+              {([
+                { value: "available", label: "Available" },
+                { value: "maintenance", label: "Under Maintenance" },
+              ] as { value: EditableStatus; label: string }[]).map((opt) => {
+                const active = status === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setStatus(opt.value)}
+                    className={[
+                      "px-3 h-9 rounded-md text-xs font-medium border transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-foreground border-border hover:bg-muted",
+                    ].join(" ")}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              "Occupied" is set automatically when the room has an active booking.
+            </p>
           </div>
 
           {error && (

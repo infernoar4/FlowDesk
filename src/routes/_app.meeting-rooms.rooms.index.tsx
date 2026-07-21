@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/ui-kit/SearchBar";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui-kit/Button";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { MeetingRoomCard } from "@/components/meeting-rooms/MeetingRoomCard";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   EQUIPMENT_OPTIONS,
   ROOM_STATUS_LABELS,
@@ -22,7 +23,8 @@ export const Route = createFileRoute("/_app/meeting-rooms/rooms/")({
 });
 
 function RoomsPage() {
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const isSupport = view === "support";
 
   const [query, setQuery] = useState("");
@@ -136,12 +138,13 @@ function RoomsPage() {
                     <Button size="sm" variant="outline" onClick={() => setEditRoom(room)}>
                       Edit Room
                     </Button>
-                    <a
-                      href={`/meeting-rooms/rooms/${room.id}`}
+                    <Link
+                      to="/meeting-rooms/rooms/$roomId"
+                      params={{ roomId: room.id }}
                       className="text-xs font-medium text-primary hover:underline px-2"
                     >
                       Details
-                    </a>
+                    </Link>
                   </div>
                 ) : undefined
               }

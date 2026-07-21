@@ -337,6 +337,32 @@ export function isBeforeStart(booking: Booking): boolean {
   return bookingStart > now;
 }
 
+/** Current HH:mm reference used to compute "occupied" status. */
+function currentTimeHHMM(): string {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+/**
+ * Effective room status. "occupied" is derived from active bookings during
+ * the current time and never stored manually. Maintenance takes precedence.
+ */
+export function computeRoomStatus(room: Room): RoomStatus {
+  if (room.status === "maintenance") return "maintenance";
+  const now = currentTimeHHMM();
+  const active = bookings.some(
+    (b) =>
+      b.roomId === room.id &&
+      b.date === TODAY_ISO &&
+      b.status === "booked" &&
+      b.startTime <= now &&
+      b.endTime > now,
+  );
+  return active ? "occupied" : "available";
+}
+
 export const BOOKING_STAGES = [
   { key: "booked", label: "Booked" },
   { key: "completed", label: "Completed" },

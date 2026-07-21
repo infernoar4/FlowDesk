@@ -7,7 +7,7 @@ import { DashboardCard } from "@/components/ui-kit/DashboardCard";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
 import { BookingTimeline } from "@/components/meeting-rooms/BookingTimeline";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   bookings,
   CURRENT_EMPLOYEE,
@@ -42,7 +42,8 @@ function BookingNotFound() {
 
 function BookingDetailsPage() {
   const booking = Route.useLoaderData();
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   const room = getRoom(booking.roomId);
   const isOwner = booking.employee === CURRENT_EMPLOYEE && view !== "support";
   const editable = isOwner && booking.status === "booked" && isBeforeStart(booking);

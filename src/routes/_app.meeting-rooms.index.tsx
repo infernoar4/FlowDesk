@@ -16,9 +16,10 @@ import { DataTable, type Column } from "@/components/ui-kit/DataTable";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
 import { RoomStatusBadge } from "@/components/meeting-rooms/RoomStatusBadge";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
-import { useMeetingRoomView } from "@/context/MeetingRoomViewContext";
+import { useRole } from "@/context/RoleContext";
 import {
   bookings,
+  computeRoomStatus,
   CURRENT_EMPLOYEE,
   CURRENT_SUPPORT,
   formatDate,
@@ -35,7 +36,8 @@ export const Route = createFileRoute("/_app/meeting-rooms/")({
 });
 
 function MeetingRoomsDashboardRouter() {
-  const { view } = useMeetingRoomView();
+  const { role } = useRole();
+  const view = role;
   return view === "support" ? <SupportDashboard /> : <EmployeeDashboard />;
 }
 
@@ -278,7 +280,7 @@ function SupportDashboard() {
                   {r.floor} · Seats {r.capacity}
                 </div>
               </div>
-              <RoomStatusBadge status={r.status} />
+              <RoomStatusBadge status={computeRoomStatus(r)} />
             </li>
           ))}
         </ul>
