@@ -279,7 +279,7 @@ function SupportDashboard() {
                   {r.floor} · Seats {r.capacity}
                 </div>
               </div>
-              <RoomStatusBadge status={r.status} />
+              <RoomStatusBadge status={computeRoomStatus(r)} />
             </li>
           ))}
         </ul>
