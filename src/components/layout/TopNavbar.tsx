@@ -44,10 +44,22 @@ export function TopNavbar() {
           <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
             <HelpCircle className="h-5 w-5" />
           </button>
-          <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
-          </button>
+          <div className="relative" ref={bellRef}>
+            <button
+              type="button"
+              onClick={() => setBellOpen((o) => !o)}
+              aria-label="Notifications"
+              aria-expanded={bellOpen}
+              className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground relative"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+              )}
+            </button>
+            {bellOpen && <NotificationBellDropdown onClose={() => setBellOpen(false)} />}
+          </div>
+
           <Link
             to="/profile"
             className="ml-2 flex items-center gap-2 pl-2 pr-3 h-10 rounded-lg hover:bg-muted transition-colors"
