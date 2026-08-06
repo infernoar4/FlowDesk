@@ -1,13 +1,29 @@
+import { useEffect, useRef, useState } from "react";
 import { Bell, HelpCircle, Search } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
+import { NotificationBellDropdown } from "@/components/notifications/NotificationBellDropdown";
+import { useNotifications } from "@/context/NotificationsContext";
 
 export function TopNavbar() {
   const { role } = useRole();
+  const { unreadCount } = useNotifications();
+  const [bellOpen, setBellOpen] = useState(false);
+  const bellRef = useRef<HTMLDivElement>(null);
   const displayName = role === "support" ? CURRENT_ENGINEER : "Alex Lee";
   const displayRole = role === "support" ? "Support Engineer" : "Operations";
   const initials = role === "support" ? "RK" : "AL";
+
+  useEffect(() => {
+    if (!bellOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!bellRef.current?.contains(e.target as Node)) setBellOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [bellOpen]);
+
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur border-b border-border">
@@ -28,10 +44,22 @@ export function TopNavbar() {
           <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
             <HelpCircle className="h-5 w-5" />
           </button>
-          <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
-          </button>
+          <div className="relative" ref={bellRef}>
+            <button
+              type="button"
+              onClick={() => setBellOpen((o) => !o)}
+              aria-label="Notifications"
+              aria-expanded={bellOpen}
+              className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground relative"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+              )}
+            </button>
+            {bellOpen && <NotificationBellDropdown onClose={() => setBellOpen(false)} />}
+          </div>
+
           <Link
             to="/profile"
             className="ml-2 flex items-center gap-2 pl-2 pr-3 h-10 rounded-lg hover:bg-muted transition-colors"

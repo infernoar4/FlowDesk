@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
 import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
 import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-tickets'
@@ -55,6 +56,11 @@ const AppTicketsRoute = AppTicketsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMeetingRoomsRoute = AppMeetingRoomsRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/assigned-tickets': typeof AppAssignedTicketsRoute
   '/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/tickets': typeof AppTicketsRouteWithChildren
   '/assets/$assetId': typeof AppAssetsAssetIdRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/': typeof AppIndexRoute
   '/assets/$assetId': typeof AppAssetsAssetIdRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
   '/_app/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/_app/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
+  '/_app/notifications': typeof AppNotificationsRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/tickets': typeof AppTicketsRouteWithChildren
   '/_app/': typeof AppIndexRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/assigned-tickets'
     | '/leave-requests'
     | '/meeting-rooms'
+    | '/notifications'
     | '/profile'
     | '/tickets'
     | '/assets/$assetId'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/announcements'
     | '/assigned-tickets'
+    | '/notifications'
     | '/profile'
     | '/'
     | '/assets/$assetId'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/_app/assigned-tickets'
     | '/_app/leave-requests'
     | '/_app/meeting-rooms'
+    | '/_app/notifications'
     | '/_app/profile'
     | '/_app/tickets'
     | '/_app/'
@@ -334,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/meeting-rooms': {
@@ -536,6 +555,7 @@ interface AppRouteChildren {
   AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRouteWithChildren
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRouteWithChildren
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppTicketsRoute: typeof AppTicketsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
@@ -547,6 +567,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAssignedTicketsRoute: AppAssignedTicketsRoute,
   AppLeaveRequestsRoute: AppLeaveRequestsRouteWithChildren,
   AppMeetingRoomsRoute: AppMeetingRoomsRouteWithChildren,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppTicketsRoute: AppTicketsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
