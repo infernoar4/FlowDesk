@@ -1,13 +1,29 @@
+import { useEffect, useRef, useState } from "react";
 import { Bell, HelpCircle, Search } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
+import { NotificationBellDropdown } from "@/components/notifications/NotificationBellDropdown";
+import { useNotifications } from "@/context/NotificationsContext";
 
 export function TopNavbar() {
   const { role } = useRole();
+  const { unreadCount } = useNotifications();
+  const [bellOpen, setBellOpen] = useState(false);
+  const bellRef = useRef<HTMLDivElement>(null);
   const displayName = role === "support" ? CURRENT_ENGINEER : "Alex Lee";
   const displayRole = role === "support" ? "Support Engineer" : "Operations";
   const initials = role === "support" ? "RK" : "AL";
+
+  useEffect(() => {
+    if (!bellOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!bellRef.current?.contains(e.target as Node)) setBellOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [bellOpen]);
+
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur border-b border-border">
