@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { Bell, HelpCircle, Moon, Search, Sun } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
 import { NotificationBellDropdown } from "@/components/notifications/NotificationBellDropdown";
 import { useNotifications } from "@/context/NotificationsContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export function TopNavbar() {
   const { role } = useRole();
