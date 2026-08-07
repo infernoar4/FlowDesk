@@ -10,6 +10,7 @@ import { useTheme } from "@/context/ThemeContext";
 export function TopNavbar() {
   const { role } = useRole();
   const { unreadCount } = useNotifications();
+  const { theme, toggleTheme } = useTheme();
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const displayName = role === "support" ? CURRENT_ENGINEER : "Alex Lee";
