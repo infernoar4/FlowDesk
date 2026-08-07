@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { Bell, HelpCircle, Moon, Search, Sun } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
 import { NotificationBellDropdown } from "@/components/notifications/NotificationBellDropdown";
 import { useNotifications } from "@/context/NotificationsContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export function TopNavbar() {
   const { role } = useRole();
   const { unreadCount } = useNotifications();
+  const { theme, toggleTheme } = useTheme();
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const displayName = role === "support" ? CURRENT_ENGINEER : "Alex Lee";
@@ -41,6 +43,15 @@ export function TopNavbar() {
 
         <div className="flex items-center gap-2">
           <RoleSwitcher />
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
           <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
             <HelpCircle className="h-5 w-5" />
           </button>
