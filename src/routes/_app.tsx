@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNavbar } from "@/components/layout/TopNavbar";
 import { RoleProvider } from "@/context/RoleContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
