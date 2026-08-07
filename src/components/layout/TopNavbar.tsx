@@ -43,6 +43,15 @@ export function TopNavbar() {
 
         <div className="flex items-center gap-2">
           <RoleSwitcher />
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
           <button className="h-10 w-10 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
             <HelpCircle className="h-5 w-5" />
           </button>
