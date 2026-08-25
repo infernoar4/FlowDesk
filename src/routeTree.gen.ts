@@ -9,38 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
-import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
-import { Route as AppProfileRouteImport } from './routes/_app.profile'
-import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
-import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
-import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
-import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-tickets'
-import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
-import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
-import { Route as AppMeetingRoomsIndexRouteImport } from './routes/_app.meeting-rooms.index'
-import { Route as AppLeaveRequestsIndexRouteImport } from './routes/_app.leave-requests.index'
+import { Route as AppAssetsRouteImport } from './routes/_app.assets'
+import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-tickets'
+import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
+import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppTicketsRouteImport } from './routes/_app.tickets'
 import { Route as AppAssetsIndexRouteImport } from './routes/_app.assets.index'
-import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$ticketId'
-import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-requests.all'
-import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
-import { Route as AppAssetsAllRouteImport } from './routes/_app.assets.all'
 import { Route as AppAssetsAssetIdRouteImport } from './routes/_app.assets.$assetId'
-import { Route as AppMeetingRoomsRoomsIndexRouteImport } from './routes/_app.meeting-rooms.rooms.index'
+import { Route as AppAssetsAllRouteImport } from './routes/_app.assets.all'
+import { Route as AppLeaveRequestsIndexRouteImport } from './routes/_app.leave-requests.index'
+import { Route as AppLeaveRequestsLeaveIdRouteImport } from './routes/_app.leave-requests.$leaveId'
+import { Route as AppLeaveRequestsAllRouteImport } from './routes/_app.leave-requests.all'
+import { Route as AppMeetingRoomsIndexRouteImport } from './routes/_app.meeting-rooms.index'
+import { Route as AppTicketsIndexRouteImport } from './routes/_app.tickets.index'
+import { Route as AppTicketsTicketIdRouteImport } from './routes/_app.tickets.$ticketId'
 import { Route as AppMeetingRoomsBookingsIndexRouteImport } from './routes/_app.meeting-rooms.bookings.index'
-import { Route as AppMeetingRoomsRoomsRoomIdRouteImport } from './routes/_app.meeting-rooms.rooms.$roomId'
 import { Route as AppMeetingRoomsBookingsBookingIdRouteImport } from './routes/_app.meeting-rooms.bookings.$bookingId'
+import { Route as AppMeetingRoomsRoomsIndexRouteImport } from './routes/_app.meeting-rooms.rooms.index'
+import { Route as AppMeetingRoomsRoomsRoomIdRouteImport } from './routes/_app.meeting-rooms.rooms.$roomId'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -48,34 +48,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTicketsRoute = AppTicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppProfileRoute = AppProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppNotificationsRoute = AppNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMeetingRoomsRoute = AppMeetingRoomsRouteImport.update({
-  id: '/meeting-rooms',
-  path: '/meeting-rooms',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLeaveRequestsRoute = AppLeaveRequestsRouteImport.update({
-  id: '/leave-requests',
-  path: '/leave-requests',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAssignedTicketsRoute = AppAssignedTicketsRouteImport.update({
-  id: '/assigned-tickets',
-  path: '/assigned-tickets',
+const AppAnnouncementsRoute = AppAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAssetsRoute = AppAssetsRouteImport.update({
@@ -83,49 +58,39 @@ const AppAssetsRoute = AppAssetsRouteImport.update({
   path: '/assets',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAnnouncementsRoute = AppAnnouncementsRouteImport.update({
-  id: '/announcements',
-  path: '/announcements',
+const AppAssignedTicketsRoute = AppAssignedTicketsRouteImport.update({
+  id: '/assigned-tickets',
+  path: '/assigned-tickets',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppTicketsRoute,
+const AppLeaveRequestsRoute = AppLeaveRequestsRouteImport.update({
+  id: '/leave-requests',
+  path: '/leave-requests',
+  getParentRoute: () => AppRoute,
 } as any)
-const AppMeetingRoomsIndexRoute = AppMeetingRoomsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppMeetingRoomsRoute,
+const AppMeetingRoomsRoute = AppMeetingRoomsRouteImport.update({
+  id: '/meeting-rooms',
+  path: '/meeting-rooms',
+  getParentRoute: () => AppRoute,
 } as any)
-const AppLeaveRequestsIndexRoute = AppLeaveRequestsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppLeaveRequestsRoute,
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTicketsRoute = AppTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAssetsIndexRoute = AppAssetsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppAssetsRoute,
-} as any)
-const AppTicketsTicketIdRoute = AppTicketsTicketIdRouteImport.update({
-  id: '/$ticketId',
-  path: '/$ticketId',
-  getParentRoute: () => AppTicketsRoute,
-} as any)
-const AppLeaveRequestsAllRoute = AppLeaveRequestsAllRouteImport.update({
-  id: '/all',
-  path: '/all',
-  getParentRoute: () => AppLeaveRequestsRoute,
-} as any)
-const AppLeaveRequestsLeaveIdRoute = AppLeaveRequestsLeaveIdRouteImport.update({
-  id: '/$leaveId',
-  path: '/$leaveId',
-  getParentRoute: () => AppLeaveRequestsRoute,
-} as any)
-const AppAssetsAllRoute = AppAssetsAllRouteImport.update({
-  id: '/all',
-  path: '/all',
   getParentRoute: () => AppAssetsRoute,
 } as any)
 const AppAssetsAssetIdRoute = AppAssetsAssetIdRouteImport.update({
@@ -133,28 +98,63 @@ const AppAssetsAssetIdRoute = AppAssetsAssetIdRouteImport.update({
   path: '/$assetId',
   getParentRoute: () => AppAssetsRoute,
 } as any)
-const AppMeetingRoomsRoomsIndexRoute =
-  AppMeetingRoomsRoomsIndexRouteImport.update({
-    id: '/rooms/',
-    path: '/rooms/',
-    getParentRoute: () => AppMeetingRoomsRoute,
-  } as any)
+const AppAssetsAllRoute = AppAssetsAllRouteImport.update({
+  id: '/all',
+  path: '/all',
+  getParentRoute: () => AppAssetsRoute,
+} as any)
+const AppLeaveRequestsIndexRoute = AppLeaveRequestsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppLeaveRequestsRoute,
+} as any)
+const AppLeaveRequestsLeaveIdRoute = AppLeaveRequestsLeaveIdRouteImport.update({
+  id: '/$leaveId',
+  path: '/$leaveId',
+  getParentRoute: () => AppLeaveRequestsRoute,
+} as any)
+const AppLeaveRequestsAllRoute = AppLeaveRequestsAllRouteImport.update({
+  id: '/all',
+  path: '/all',
+  getParentRoute: () => AppLeaveRequestsRoute,
+} as any)
+const AppMeetingRoomsIndexRoute = AppMeetingRoomsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppMeetingRoomsRoute,
+} as any)
+const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppTicketsRoute,
+} as any)
+const AppTicketsTicketIdRoute = AppTicketsTicketIdRouteImport.update({
+  id: '/$ticketId',
+  path: '/$ticketId',
+  getParentRoute: () => AppTicketsRoute,
+} as any)
 const AppMeetingRoomsBookingsIndexRoute =
   AppMeetingRoomsBookingsIndexRouteImport.update({
     id: '/bookings/',
     path: '/bookings/',
     getParentRoute: () => AppMeetingRoomsRoute,
   } as any)
-const AppMeetingRoomsRoomsRoomIdRoute =
-  AppMeetingRoomsRoomsRoomIdRouteImport.update({
-    id: '/rooms/$roomId',
-    path: '/rooms/$roomId',
-    getParentRoute: () => AppMeetingRoomsRoute,
-  } as any)
 const AppMeetingRoomsBookingsBookingIdRoute =
   AppMeetingRoomsBookingsBookingIdRouteImport.update({
     id: '/bookings/$bookingId',
     path: '/bookings/$bookingId',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
+const AppMeetingRoomsRoomsIndexRoute =
+  AppMeetingRoomsRoomsIndexRouteImport.update({
+    id: '/rooms/',
+    path: '/rooms/',
+    getParentRoute: () => AppMeetingRoomsRoute,
+  } as any)
+const AppMeetingRoomsRoomsRoomIdRoute =
+  AppMeetingRoomsRoomsRoomIdRouteImport.update({
+    id: '/rooms/$roomId',
+    path: '/rooms/$roomId',
     getParentRoute: () => AppMeetingRoomsRoute,
   } as any)
 
@@ -313,18 +313,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_app': {
       id: '/_app'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -334,46 +334,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tickets': {
-      id: '/_app/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof AppTicketsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/profile': {
-      id: '/_app/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/notifications': {
-      id: '/_app/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AppNotificationsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/meeting-rooms': {
-      id: '/_app/meeting-rooms'
-      path: '/meeting-rooms'
-      fullPath: '/meeting-rooms'
-      preLoaderRoute: typeof AppMeetingRoomsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/leave-requests': {
-      id: '/_app/leave-requests'
-      path: '/leave-requests'
-      fullPath: '/leave-requests'
-      preLoaderRoute: typeof AppLeaveRequestsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/assigned-tickets': {
-      id: '/_app/assigned-tickets'
-      path: '/assigned-tickets'
-      fullPath: '/assigned-tickets'
-      preLoaderRoute: typeof AppAssignedTicketsRouteImport
+    '/_app/announcements': {
+      id: '/_app/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AppAnnouncementsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/assets': {
@@ -383,67 +348,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/announcements': {
-      id: '/_app/announcements'
-      path: '/announcements'
-      fullPath: '/announcements'
-      preLoaderRoute: typeof AppAnnouncementsRouteImport
+    '/_app/assigned-tickets': {
+      id: '/_app/assigned-tickets'
+      path: '/assigned-tickets'
+      fullPath: '/assigned-tickets'
+      preLoaderRoute: typeof AppAssignedTicketsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tickets/': {
-      id: '/_app/tickets/'
-      path: '/'
-      fullPath: '/tickets/'
-      preLoaderRoute: typeof AppTicketsIndexRouteImport
-      parentRoute: typeof AppTicketsRoute
+    '/_app/leave-requests': {
+      id: '/_app/leave-requests'
+      path: '/leave-requests'
+      fullPath: '/leave-requests'
+      preLoaderRoute: typeof AppLeaveRequestsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/meeting-rooms/': {
-      id: '/_app/meeting-rooms/'
-      path: '/'
-      fullPath: '/meeting-rooms/'
-      preLoaderRoute: typeof AppMeetingRoomsIndexRouteImport
-      parentRoute: typeof AppMeetingRoomsRoute
+    '/_app/meeting-rooms': {
+      id: '/_app/meeting-rooms'
+      path: '/meeting-rooms'
+      fullPath: '/meeting-rooms'
+      preLoaderRoute: typeof AppMeetingRoomsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/leave-requests/': {
-      id: '/_app/leave-requests/'
-      path: '/'
-      fullPath: '/leave-requests/'
-      preLoaderRoute: typeof AppLeaveRequestsIndexRouteImport
-      parentRoute: typeof AppLeaveRequestsRoute
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tickets': {
+      id: '/_app/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof AppTicketsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/assets/': {
       id: '/_app/assets/'
       path: '/'
       fullPath: '/assets/'
       preLoaderRoute: typeof AppAssetsIndexRouteImport
-      parentRoute: typeof AppAssetsRoute
-    }
-    '/_app/tickets/$ticketId': {
-      id: '/_app/tickets/$ticketId'
-      path: '/$ticketId'
-      fullPath: '/tickets/$ticketId'
-      preLoaderRoute: typeof AppTicketsTicketIdRouteImport
-      parentRoute: typeof AppTicketsRoute
-    }
-    '/_app/leave-requests/all': {
-      id: '/_app/leave-requests/all'
-      path: '/all'
-      fullPath: '/leave-requests/all'
-      preLoaderRoute: typeof AppLeaveRequestsAllRouteImport
-      parentRoute: typeof AppLeaveRequestsRoute
-    }
-    '/_app/leave-requests/$leaveId': {
-      id: '/_app/leave-requests/$leaveId'
-      path: '/$leaveId'
-      fullPath: '/leave-requests/$leaveId'
-      preLoaderRoute: typeof AppLeaveRequestsLeaveIdRouteImport
-      parentRoute: typeof AppLeaveRequestsRoute
-    }
-    '/_app/assets/all': {
-      id: '/_app/assets/all'
-      path: '/all'
-      fullPath: '/assets/all'
-      preLoaderRoute: typeof AppAssetsAllRouteImport
       parentRoute: typeof AppAssetsRoute
     }
     '/_app/assets/$assetId': {
@@ -453,12 +404,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsAssetIdRouteImport
       parentRoute: typeof AppAssetsRoute
     }
-    '/_app/meeting-rooms/rooms/': {
-      id: '/_app/meeting-rooms/rooms/'
-      path: '/rooms'
-      fullPath: '/meeting-rooms/rooms/'
-      preLoaderRoute: typeof AppMeetingRoomsRoomsIndexRouteImport
+    '/_app/assets/all': {
+      id: '/_app/assets/all'
+      path: '/all'
+      fullPath: '/assets/all'
+      preLoaderRoute: typeof AppAssetsAllRouteImport
+      parentRoute: typeof AppAssetsRoute
+    }
+    '/_app/leave-requests/': {
+      id: '/_app/leave-requests/'
+      path: '/'
+      fullPath: '/leave-requests/'
+      preLoaderRoute: typeof AppLeaveRequestsIndexRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
+    '/_app/leave-requests/$leaveId': {
+      id: '/_app/leave-requests/$leaveId'
+      path: '/$leaveId'
+      fullPath: '/leave-requests/$leaveId'
+      preLoaderRoute: typeof AppLeaveRequestsLeaveIdRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
+    '/_app/leave-requests/all': {
+      id: '/_app/leave-requests/all'
+      path: '/all'
+      fullPath: '/leave-requests/all'
+      preLoaderRoute: typeof AppLeaveRequestsAllRouteImport
+      parentRoute: typeof AppLeaveRequestsRoute
+    }
+    '/_app/meeting-rooms/': {
+      id: '/_app/meeting-rooms/'
+      path: '/'
+      fullPath: '/meeting-rooms/'
+      preLoaderRoute: typeof AppMeetingRoomsIndexRouteImport
       parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/tickets/': {
+      id: '/_app/tickets/'
+      path: '/'
+      fullPath: '/tickets/'
+      preLoaderRoute: typeof AppTicketsIndexRouteImport
+      parentRoute: typeof AppTicketsRoute
+    }
+    '/_app/tickets/$ticketId': {
+      id: '/_app/tickets/$ticketId'
+      path: '/$ticketId'
+      fullPath: '/tickets/$ticketId'
+      preLoaderRoute: typeof AppTicketsTicketIdRouteImport
+      parentRoute: typeof AppTicketsRoute
     }
     '/_app/meeting-rooms/bookings/': {
       id: '/_app/meeting-rooms/bookings/'
@@ -467,18 +460,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingRoomsBookingsIndexRouteImport
       parentRoute: typeof AppMeetingRoomsRoute
     }
-    '/_app/meeting-rooms/rooms/$roomId': {
-      id: '/_app/meeting-rooms/rooms/$roomId'
-      path: '/rooms/$roomId'
-      fullPath: '/meeting-rooms/rooms/$roomId'
-      preLoaderRoute: typeof AppMeetingRoomsRoomsRoomIdRouteImport
-      parentRoute: typeof AppMeetingRoomsRoute
-    }
     '/_app/meeting-rooms/bookings/$bookingId': {
       id: '/_app/meeting-rooms/bookings/$bookingId'
       path: '/bookings/$bookingId'
       fullPath: '/meeting-rooms/bookings/$bookingId'
       preLoaderRoute: typeof AppMeetingRoomsBookingsBookingIdRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/meeting-rooms/rooms/': {
+      id: '/_app/meeting-rooms/rooms/'
+      path: '/rooms'
+      fullPath: '/meeting-rooms/rooms/'
+      preLoaderRoute: typeof AppMeetingRoomsRoomsIndexRouteImport
+      parentRoute: typeof AppMeetingRoomsRoute
+    }
+    '/_app/meeting-rooms/rooms/$roomId': {
+      id: '/_app/meeting-rooms/rooms/$roomId'
+      path: '/rooms/$roomId'
+      fullPath: '/meeting-rooms/rooms/$roomId'
+      preLoaderRoute: typeof AppMeetingRoomsRoomsRoomIdRouteImport
       parentRoute: typeof AppMeetingRoomsRoute
     }
   }
@@ -582,3 +582,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
