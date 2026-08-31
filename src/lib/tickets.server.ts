@@ -24,7 +24,8 @@ const ALLOWED_ATTACHMENT_TYPES: Record<string, string> = {
   ".xls": "application/vnd.ms-excel",
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
-const SAFE_ATTACHMENT_URL_PATTERN = /^\/uploads\/tickets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpe?g|gif|webp|pdf|txt|docx?|xlsx?)$/i;
+const SAFE_ATTACHMENT_URL_PATTERN =
+  /^\/uploads\/tickets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpe?g|gif|webp|pdf|txt|docx?|xlsx?)$/i;
 
 function assertSafeAttachmentUrl(value: string): string {
   if (!SAFE_ATTACHMENT_URL_PATTERN.test(value)) {
@@ -119,19 +120,17 @@ export function mapDatabaseTicketDetail(ticket: DatabaseTicketDetail): Ticket {
   };
 }
 
-export const getTickets = createServerFn({ method: "GET" })
-  .handler(async () => {
-        const { db } = await import("./db");
-    const {
-      requireAuthenticatedUser,
-      getCurrentEmployee,
-      getCurrentSupportEngineer,
-    } = await import("./authorization.server");
-    const currentUser = await requireAuthenticatedUser();
-    const employee = currentUser.role === "employee" ? await getCurrentEmployee() : null;
-    if (currentUser.role === "support") await getCurrentSupportEngineer();
-    if (!employee && currentUser.role !== "support") throw new Error("You are not authorized to view tickets.");
-    const [rows] = await db.query(`
+export const getTickets = createServerFn({ method: "GET" }).handler(async () => {
+  const { db } = await import("./db");
+  const { requireAuthenticatedUser, getCurrentEmployee, getCurrentSupportEngineer } =
+    await import("./authorization.server");
+  const currentUser = await requireAuthenticatedUser();
+  const employee = currentUser.role === "employee" ? await getCurrentEmployee() : null;
+  if (currentUser.role === "support") await getCurrentSupportEngineer();
+  if (!employee && currentUser.role !== "support")
+    throw new Error("You are not authorized to view tickets.");
+  const [rows] = await db.query(
+    `
         SELECT
             t.id,
             t.title,
@@ -153,30 +152,31 @@ export const getTickets = createServerFn({ method: "GET" })
                            ON t.assignee_id = assignee.id
         ${employee ? "WHERE t.reporter_id = ?" : ""}
         ORDER BY t.created_at DESC
-    `, employee ? [employee.id] : []);
+    `,
+    employee ? [employee.id] : [],
+  );
 
-    return rows as DatabaseTicket[];
-  });
+  return rows as DatabaseTicket[];
+});
 
-export const getEmployeeTicketDashboard = createServerFn({ method: "GET" }).handler(
-  async () => {
-        const { db } = await import("./db");
-    const { getCurrentEmployee } = await import("./authorization.server");
-    const employee = await getCurrentEmployee();
+export const getEmployeeTicketDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  const { db } = await import("./db");
+  const { getCurrentEmployee } = await import("./authorization.server");
+  const employee = await getCurrentEmployee();
 
-    const [countRows, recentRows] = await Promise.all([
-      db.query(
-        `
+  const [countRows, recentRows] = await Promise.all([
+    db.query(
+      `
           SELECT
             COALESCE(SUM(status = 'open'), 0) AS open_ticket_count,
             COALESCE(SUM(status <> 'closed'), 0) AS active_ticket_count
           FROM tickets
           WHERE reporter_id = ?
         `,
-        [employee.id],
-      ),
-      db.query(
-        `
+      [employee.id],
+    ),
+    db.query(
+      `
           SELECT
             t.id,
             t.title,
@@ -196,33 +196,33 @@ export const getEmployeeTicketDashboard = createServerFn({ method: "GET" }).hand
           ORDER BY t.created_at DESC, t.id DESC
           LIMIT 4
         `,
-        [employee.id],
-      ),
-    ]);
+      [employee.id],
+    ),
+  ]);
 
-    const counts = (countRows[0] as {
+  const counts = (
+    countRows[0] as {
       open_ticket_count: number | string;
       active_ticket_count: number | string;
-    }[])[0];
+    }[]
+  )[0];
 
-    return {
-      employeeName: employee.fullName,
-      openTicketCount: Number(counts?.open_ticket_count ?? 0),
-      activeTicketCount: Number(counts?.active_ticket_count ?? 0),
-      recentTickets: recentRows[0] as DatabaseTicket[],
-    } satisfies EmployeeTicketDashboard;
-  },
-);
+  return {
+    employeeName: employee.fullName,
+    openTicketCount: Number(counts?.open_ticket_count ?? 0),
+    activeTicketCount: Number(counts?.active_ticket_count ?? 0),
+    recentTickets: recentRows[0] as DatabaseTicket[],
+  } satisfies EmployeeTicketDashboard;
+});
 
-export const getSupportTicketDashboard = createServerFn({ method: "GET" })
-  .handler(async () => {
-        const { db } = await import("./db");
-    const { getCurrentSupportEngineer } = await import("./authorization.server");
-    const engineer = await getCurrentSupportEngineer();
+export const getSupportTicketDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  const { db } = await import("./db");
+  const { getCurrentSupportEngineer } = await import("./authorization.server");
+  const engineer = await getCurrentSupportEngineer();
 
-    const [countRows, waitingRows, assignedRows, recentRows] = await Promise.all([
-      db.query(
-        `
+  const [countRows, waitingRows, assignedRows, recentRows] = await Promise.all([
+    db.query(
+      `
           SELECT
             COALESCE(SUM(status = 'open'), 0) AS open_ticket_count,
             COALESCE(SUM(status = 'open' AND assignee_id IS NULL), 0) AS waiting_for_assignment_count,
@@ -231,9 +231,9 @@ export const getSupportTicketDashboard = createServerFn({ method: "GET" })
             COALESCE(SUM(status = 'resolved' AND DATE(updated_at) = CURDATE()), 0) AS resolved_today_count
           FROM tickets
         `,
-        [engineer.id],
-      ),
-      db.query(`
+      [engineer.id],
+    ),
+    db.query(`
         SELECT
           t.id,
           t.title,
@@ -252,8 +252,8 @@ export const getSupportTicketDashboard = createServerFn({ method: "GET" })
         WHERE t.status = 'open' AND t.assignee_id IS NULL
         ORDER BY t.created_at DESC, t.id DESC
       `),
-      db.query(
-        `
+    db.query(
+      `
           SELECT
             t.id,
             t.title,
@@ -272,9 +272,9 @@ export const getSupportTicketDashboard = createServerFn({ method: "GET" })
           WHERE t.assignee_id = ? AND t.status <> 'closed'
           ORDER BY t.updated_at DESC, t.id DESC
         `,
-        [engineer.id],
-      ),
-      db.query(`
+      [engineer.id],
+    ),
+    db.query(`
         SELECT
           t.id,
           t.title,
@@ -293,36 +293,35 @@ export const getSupportTicketDashboard = createServerFn({ method: "GET" })
         ORDER BY t.updated_at DESC, t.id DESC
         LIMIT 4
       `),
-    ]);
+  ]);
 
-    const counts = (countRows[0] as {
+  const counts = (
+    countRows[0] as {
       open_ticket_count: number | string;
       waiting_for_assignment_count: number | string;
       assigned_to_me_count: number | string;
       high_priority_count: number | string;
       resolved_today_count: number | string;
-    }[])[0];
+    }[]
+  )[0];
 
-    return {
-      openTicketCount: Number(counts?.open_ticket_count ?? 0),
-      waitingForAssignmentCount: Number(counts?.waiting_for_assignment_count ?? 0),
-      assignedToMeCount: Number(counts?.assigned_to_me_count ?? 0),
-      highPriorityCount: Number(counts?.high_priority_count ?? 0),
-      resolvedTodayCount: Number(counts?.resolved_today_count ?? 0),
-      waitingForAssignmentTickets: waitingRows[0] as DatabaseTicket[],
-      assignedTickets: assignedRows[0] as DatabaseTicket[],
-      recentlyUpdatedTickets: recentRows[0] as DatabaseTicket[],
-    } satisfies SupportTicketDashboard;
-  });
+  return {
+    openTicketCount: Number(counts?.open_ticket_count ?? 0),
+    waitingForAssignmentCount: Number(counts?.waiting_for_assignment_count ?? 0),
+    assignedToMeCount: Number(counts?.assigned_to_me_count ?? 0),
+    highPriorityCount: Number(counts?.high_priority_count ?? 0),
+    resolvedTodayCount: Number(counts?.resolved_today_count ?? 0),
+    waitingForAssignmentTickets: waitingRows[0] as DatabaseTicket[],
+    assignedTickets: assignedRows[0] as DatabaseTicket[],
+    recentlyUpdatedTickets: recentRows[0] as DatabaseTicket[],
+  } satisfies SupportTicketDashboard;
+});
 
 export const getTicketById = createServerFn({ method: "GET" })
   .validator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-        const { db } = await import("./db");
-    const {
-      requireAuthenticatedUser,
-      getCurrentEmployee,
-    } = await import("./authorization.server");
+    const { db } = await import("./db");
+    const { requireAuthenticatedUser, getCurrentEmployee } = await import("./authorization.server");
 
     const currentUser = await requireAuthenticatedUser();
     const employee = currentUser.role === "employee" ? await getCurrentEmployee() : null;
@@ -369,8 +368,9 @@ export const getTicketById = createServerFn({ method: "GET" })
       [data.id],
     );
 
-    const [noteRows] = isSupport ? await db.query(
-      `
+    const [noteRows] = isSupport
+      ? await db.query(
+          `
         SELECT
           author.full_name AS author,
           tin.message,
@@ -380,8 +380,9 @@ export const getTicketById = createServerFn({ method: "GET" })
         WHERE tin.ticket_id = ?
         ORDER BY tin.created_at, tin.id
       `,
-      [data.id],
-    ) : [[]];
+          [data.id],
+        )
+      : [[]];
 
     return {
       ...ticket,
@@ -391,36 +392,28 @@ export const getTicketById = createServerFn({ method: "GET" })
   });
 
 export const addTicketComment = createServerFn({ method: "POST" })
-  .validator(
-    (input: {
-      ticketId: string;
-      message: string;
-    }) => input,
-  )
+  .validator((input: { ticketId: string; message: string }) => input)
   .handler(async ({ data }) => {
-        const { db } = await import("./db");
-    const {
-      requireAuthenticatedUser,
-      getCurrentSupportEngineer,
-      getCurrentEmployee,
-    } = await import("./authorization.server");
+    const { db } = await import("./db");
+    const { requireAuthenticatedUser, getCurrentSupportEngineer, getCurrentEmployee } =
+      await import("./authorization.server");
     const message = data.message.trim();
     if (!message) throw new Error("A comment message is required.");
 
-    const [tickets] = await db.query(
-      "SELECT id FROM tickets WHERE id = ? LIMIT 1",
-      [data.ticketId],
-    );
+    const [tickets] = await db.query("SELECT id FROM tickets WHERE id = ? LIMIT 1", [
+      data.ticketId,
+    ]);
     if ((tickets as { id: string }[]).length === 0) {
       throw new Error("Ticket not found.");
     }
 
     const currentUser = await requireAuthenticatedUser();
-    const author = currentUser.role === "support"
-      ? await getCurrentSupportEngineer()
-      : currentUser.role === "employee"
-        ? await getCurrentEmployee()
-        : null;
+    const author =
+      currentUser.role === "support"
+        ? await getCurrentSupportEngineer()
+        : currentUser.role === "employee"
+          ? await getCurrentEmployee()
+          : null;
     if (!author) throw new Error("You are not authorized to comment on tickets.");
     const role = author.role === "support" ? "Support" : "Employee";
 
@@ -442,16 +435,11 @@ export const addTicketComment = createServerFn({ method: "POST" })
       [data.ticketId, author.id, role, message],
     );
 
-    return { id: (result as { insertId: number }).insertId };
+    return { id: (result as unknown as { insertId: number }).insertId };
   });
 
 export const addTicketInternalNote = createServerFn({ method: "POST" })
-  .validator(
-    (input: {
-      ticketId: string;
-      message: string;
-    }) => input,
-  )
+  .validator((input: { ticketId: string; message: string }) => input)
   .handler(async ({ data }) => {
     const { db } = await import("./db");
     const { getCurrentSupportEngineer } = await import("./authorization.server");
@@ -459,10 +447,9 @@ export const addTicketInternalNote = createServerFn({ method: "POST" })
     const message = data.message.trim();
     if (!message) throw new Error("An internal note is required.");
 
-    const [tickets] = await db.query(
-      "SELECT id FROM tickets WHERE id = ? LIMIT 1",
-      [data.ticketId],
-    );
+    const [tickets] = await db.query("SELECT id FROM tickets WHERE id = ? LIMIT 1", [
+      data.ticketId,
+    ]);
 
     if ((tickets as { id: string }[]).length === 0) {
       throw new Error("Ticket not found.");
@@ -478,7 +465,7 @@ export const addTicketInternalNote = createServerFn({ method: "POST" })
       [data.ticketId, author.id, message],
     );
 
-    return { id: (result as { insertId: number }).insertId };
+    return { id: (result as unknown as { insertId: number }).insertId };
   });
 
 export const uploadTicketAttachment = createServerFn({ method: "POST" })
@@ -495,11 +482,7 @@ export const uploadTicketAttachment = createServerFn({ method: "POST" })
 
     const entry = data.get("file");
 
-    if (
-      !entry ||
-      typeof entry === "string" ||
-      typeof entry.arrayBuffer !== "function"
-    ) {
+    if (!entry || typeof entry === "string" || typeof entry.arrayBuffer !== "function") {
       throw new Error("Select a file to upload.");
     }
 
@@ -514,9 +497,7 @@ export const uploadTicketAttachment = createServerFn({ method: "POST" })
     }
 
     const fileName = file.name ?? "";
-    const extension = fileName
-      .slice(fileName.lastIndexOf("."))
-      .toLowerCase();
+    const extension = fileName.slice(fileName.lastIndexOf(".")).toLowerCase();
 
     const expectedMimeType = ALLOWED_ATTACHMENT_TYPES[extension];
 
@@ -530,18 +511,10 @@ export const uploadTicketAttachment = createServerFn({ method: "POST" })
       import("node:crypto"),
     ]);
 
-    const uploadDirectory = path.resolve(
-      process.cwd(),
-      "public",
-      "uploads",
-      "tickets",
-    );
+    const uploadDirectory = path.resolve(process.cwd(), "public", "uploads", "tickets");
 
     const safeFileName = `${randomUUID()}${extension}`;
-    const destination = path.resolve(
-      uploadDirectory,
-      safeFileName,
-    );
+    const destination = path.resolve(uploadDirectory, safeFileName);
 
     if (!destination.startsWith(`${uploadDirectory}${path.sep}`)) {
       throw new Error("Invalid attachment path.");
@@ -549,13 +522,9 @@ export const uploadTicketAttachment = createServerFn({ method: "POST" })
 
     await mkdir(uploadDirectory, { recursive: true });
 
-    await writeFile(
-      destination,
-      new Uint8Array(await file.arrayBuffer()),
-      {
-        flag: "wx",
-      },
-    );
+    await writeFile(destination, new Uint8Array(await file.arrayBuffer()), {
+      flag: "wx",
+    });
 
     return {
       url: `/uploads/tickets/${safeFileName}`,
@@ -585,22 +554,11 @@ export const deleteTicketAttachment = createServerFn({ method: "POST" })
       throw new Error("Cannot delete an attachment that is in use.");
     }
 
-    const [{ unlink }, path] = await Promise.all([
-      import("node:fs/promises"),
-      import("node:path"),
-    ]);
+    const [{ unlink }, path] = await Promise.all([import("node:fs/promises"), import("node:path")]);
 
-    const uploadDirectory = path.resolve(
-      process.cwd(),
-      "public",
-      "uploads",
-      "tickets",
-    );
+    const uploadDirectory = path.resolve(process.cwd(), "public", "uploads", "tickets");
 
-    const destination = path.resolve(
-      uploadDirectory,
-      path.basename(url),
-    );
+    const destination = path.resolve(uploadDirectory, path.basename(url));
 
     if (!destination.startsWith(`${uploadDirectory}${path.sep}`)) {
       throw new Error("Invalid attachment path.");
@@ -628,11 +586,10 @@ export const createTicket = createServerFn({ method: "POST" })
       attachment?: string | null;
     }) => input,
   )
-  
+
   .handler(async ({ data }) => {
     const { db } = await import("./db");
-const { getCurrentEmployee } =
-  await import("./authorization.server");
+    const { getCurrentEmployee } = await import("./authorization.server");
     const title = data.title.trim();
     const description = data.description.trim();
     const priority = data.priority ?? "Medium";
@@ -703,8 +660,7 @@ export const updateTicket = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { db } = await import("./db");
-const { getCurrentSupportEngineer } =
-  await import("./authorization.server");
+    const { getCurrentSupportEngineer } = await import("./authorization.server");
     await getCurrentSupportEngineer();
     if (!TICKET_STATUSES.includes(data.status)) {
       throw new Error("Invalid ticket status.");
@@ -724,10 +680,12 @@ const { getCurrentSupportEngineer } =
         "SELECT status, assignee_id FROM tickets WHERE id = ? FOR UPDATE",
         [data.id],
       );
-      const ticket = (ticketRows as {
-        status: TicketStatus;
-        assignee_id: number | null;
-      }[])[0];
+      const ticket = (
+        ticketRows as {
+          status: TicketStatus;
+          assignee_id: number | null;
+        }[]
+      )[0];
 
       if (!ticket) throw new Error("Ticket not found.");
       if (ticket.status === "closed") {
@@ -763,9 +721,7 @@ const { getCurrentSupportEngineer } =
         }
 
         if (allowedNextStatus[ticket.status] !== data.status) {
-          throw new Error(
-            `Invalid status transition from ${ticket.status} to ${data.status}.`,
-          );
+          throw new Error(`Invalid status transition from ${ticket.status} to ${data.status}.`);
         }
       }
 
@@ -809,8 +765,7 @@ export const closeTicket = createServerFn({ method: "POST" })
   .validator((input: { id: string }) => input)
   .handler(async ({ data }) => {
     const { db } = await import("./db");
-  const { getCurrentEmployee } =
-    await import("./authorization.server");
+    const { getCurrentEmployee } = await import("./authorization.server");
     const employee = await getCurrentEmployee();
     const [result] = await db.query(
       `
@@ -825,12 +780,10 @@ export const closeTicket = createServerFn({ method: "POST" })
       [data.id, employee.id],
     );
 
-    const affectedRows = (result as { affectedRows?: number }).affectedRows ?? 0;
+    const affectedRows = (result as unknown as { affectedRows?: number }).affectedRows ?? 0;
 
     if (affectedRows === 0) {
-      throw new Error(
-        "Ticket cannot be closed. It must be in Resolved status first.",
-      );
+      throw new Error("Ticket cannot be closed. It must be in Resolved status first.");
     }
 
     return { success: true };

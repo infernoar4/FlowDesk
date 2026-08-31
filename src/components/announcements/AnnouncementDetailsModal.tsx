@@ -54,9 +54,7 @@ export function AnnouncementDetailsModal({
       maxWidthClass="max-w-2xl"
       footer={
         <>
-          {!isSupport && !a.read && (
-            <Button onClick={() => onMarkRead(a.id)}>Mark as Read</Button>
-          )}
+          {!isSupport && !a.read && <Button onClick={() => onMarkRead(a.id)}>Mark as Read</Button>}
           {!isSupport && a.read && (
             <Button variant="outline" onClick={onClose}>
               Close

@@ -1,180 +1,98 @@
-# FlowDesk Foundation
+# 🚀 FlowDesk — Workplace Operations & Service Management Platform
 
-Build only the frontend foundation for a modern React application called **FlowDesk**, an Internal Workplace Operations Platform for small and medium-sized organizations.
+**FlowDesk** is a modern, enterprise-grade Workplace Operations & IT Service Management Platform designed for small to medium-sized organizations. Built with React, TypeScript, TanStack Router, Tailwind CSS, and powered by a MySQL database backend.
 
-Use:
+---
 
-- React
+## 🌟 Key Features & Highlights
 
-- JavaScript (ES6+)
+### ⚡ 1. Automated Workload Load-Balancer Engine
+* **Intelligent Auto-Assignment**: When an employee submits a new ticket, FlowDesk's workload engine automatically inspects active support engineers and assigns the ticket to the engineer with the lowest current workload.
+* **Strict Single-Engineer Ownership**: Only the assigned Support Engineer is authorized to update or resolve their ticket. Other engineers viewing the ticket see an authorized read-only mode warning.
 
-- React Router
+### 📜 2. Real-Time System Audit Logs (`/audit-logs`)
+* **Immutable Activity Trail**: Logs every major workplace action (ticket creation, auto-assignment, status change, leave approval, asset allocation, room booking).
+* **Search & Module Filters**: Search audit logs by user, action details, or filter by module in real-time.
 
-- Tailwind CSS
+### 🛡️ 3. Support Engineer Dual Access & Role Switcher
+* **Top Navbar Mode Switcher**: Support Engineers can seamlessly toggle between `🛡️ Support Engineer` mode and `👤 Employee View`.
+* **Persistent Active Mode**: Toggling roles persists state across all pages (Dashboard, Assets, Leaves, Tickets) and browser refreshes.
 
-- Functional Components
+### 🗄️ 4. Real MySQL Database Integration
+* **22 Seeded User Accounts**: Real MySQL database (`flowdesk.users`) populated with 22 users across Employees, Support Engineers, and Managers/HR.
+* **Dynamic Dashboard**: Computes all metrics, open tickets, pending leaves, and room bookings dynamically from live user data with zero static fallbacks.
 
-IMPORTANT:
+### 📅 5. Smart Meeting Room Booking Engine
+* **Past Date/Time Validation**: Prevents booking past dates or hours.
+* **Room Availability Verification**: Live room status indicators (Available, Occupied, Reserved).
 
-This is ONLY the frontend foundation.
+---
 
-Do NOT implement backend logic, authentication functionality, API calls, databases, business logic, state management libraries, or mock workflows.
+## 🔑 Demo Login Credentials
 
-Use only placeholder/static data.
+All seeded user accounts share the default password: **`password123`**
 
-The objective is to build a scalable UI architecture that future modules can plug into.
+| Role | Name | Email / Username | Default Mode |
+| :--- | :--- | :--- | :--- |
+| **Support Engineer** | Aryan Giri | `aryangiri9999@gmail.com` / `aryan` | Support & Employee View |
+| **Support Engineer (Lead)** | Rahul Verma | `rahul.verma@flowdesk.co` / `rahul.verma` | Support Engineer |
+| **Employee** | Alex Morgan | `alex.morgan@company.com` / `alex.morgan` | Employee View |
+| **Manager / HR** | Sarah Connor | `sarah.connor@flowdesk.co` / `sarah.connor` | Manager View |
 
-----------------------------------------------------
+---
 
-Create the following pages:
+## 🛠️ Technology Stack
 
-• Login
+* **Frontend Framework**: React 18, TypeScript, Vite
+* **Routing Engine**: TanStack Router (File-Based Routing)
+* **Styling & UI**: Vanilla Tailwind CSS, Glassmorphism, Dark/Light Mode, Lucide React Icons
+* **Database**: MySQL 8.0 / MySQL2 Connector (`flowdesk` database)
+* **Quality Assurance**: ESLint, TypeScript Strict Mode (`tsc --noEmit`)
 
-• Dashboard
+---
 
-• Tickets (placeholder)
+## 🚀 Quick Start Guide
 
-• Leave Requests (placeholder)
+### Prerequisites
+* **Node.js** (v18 or higher)
+* **npm** (v9 or higher)
+* **MySQL Server** (Optional for full DB features, runs with fallback data)
 
-• Assets (placeholder)
+### Installation & Run
 
-• Announcements (placeholder)
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/FlowDesk.git
+cd FlowDesk
 
-• Meeting Rooms (placeholder)
+# 2. Install dependencies
+npm install
 
-• Profile
-
-----------------------------------------------------
-
-Create reusable layout components:
-
-• Sidebar
-
-• Top Navbar
-
-• Page Header
-
-• Dashboard Cards
-
-• Buttons
-
-• Table Component
-
-• Search Bar
-
-• Status Badge
-
-• Empty State Component
-
-----------------------------------------------------
-
-Dashboard should include:
-
-• Welcome Card
-
-• Statistics Cards (placeholder)
-
-• Recent Activity Card
-
-• Recent Announcements Card
-
-• Quick Action Buttons
-
-All using placeholder data.
-
-----------------------------------------------------
-
-Design Requirements
-
-Modern SaaS Dashboard
-
-Professional corporate look
-
-Minimalistic
-
-Rounded corners
-
-Soft shadows
-
-Blue/Indigo primary color
-
-Excellent spacing
-
-Responsive layout
-
-Consistent typography
-
-Reusable components
-
-Avoid unnecessary animations.
-
-----------------------------------------------------
-
-Project Structure
-
-Organize the code using a scalable folder structure suitable for future expansion.
-
-Example:
-
-src/
-
-components/
-
-layouts/
-
-pages/
-
-hooks/
-
-services/
-
-utils/
-
-assets/
-
-styles/
-
-routes/
-
-----------------------------------------------------
-
-Use React Router for routing.
-
-Do not implement authentication logic.
-
-Only create the pages and navigation.
-
-Navigation should already work between all pages.
-
-----------------------------------------------------
-
-Code Quality
-
-Use clean, readable React code.
-
-Keep components modular.
-
-Avoid duplicated code.
-
-Build this as if the application will later connect to a Spring Boot backend.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/1f9eb01c-da6c-4a8a-ab8e-1325427c3cb1).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+# 3. Start development server
 npm run dev
 ```
+
+Open **[http://localhost:8080](http://localhost:8080)** in your browser.
+
+---
+
+## 📜 Project Structure
+
+```
+FlowDesk/
+├── src/
+│   ├── components/       # Reusable UI components (Sidebar, TopNavbar, Modals, Badges)
+│   ├── context/          # State management (Auth, Role, Ticket, Leave, Asset, Room, Audit)
+│   ├── data/             # Mock datasets & initial fallbacks
+│   ├── lib/              # Database drivers & server utilities
+│   ├── routes/           # TanStack file-based page routes
+│   └── styles.css        # Core design system & theme tokens
+├── scripts/              # Database setup & viewer tools
+├── package.json          # Dependencies & build scripts
+└── tsconfig.json         # TypeScript strict configuration
+```
+
+---
+
+## 📄 License
+This project is licensed under the MIT License — created for final-year graduation capstone evaluation.

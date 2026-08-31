@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { BellRing, CheckCheck } from "lucide-react";
+import { BellRing, CheckCheck, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { SearchBar } from "@/components/ui-kit/SearchBar";
@@ -22,11 +22,6 @@ export const Route = createFileRoute("/_app/notifications")({
         content:
           "All FlowDesk activity in one place — ticket updates, leave decisions, asset assignments, meeting reminders and announcements.",
       },
-      { property: "og:title", content: "Notifications — FlowDesk" },
-      {
-        property: "og:description",
-        content: "Track ticket, leave, asset, meeting and announcement activity in FlowDesk.",
-      },
     ],
   }),
   component: NotificationsPage,
@@ -35,7 +30,7 @@ export const Route = createFileRoute("/_app/notifications")({
 type StatusFilter = "all" | "unread" | "read";
 
 function NotificationsPage() {
-  const { items, unreadCount, markRead, markAllRead } = useNotifications();
+  const { items, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [type, setType] = useState<"all" | NotificationType>("all");
@@ -44,7 +39,8 @@ function NotificationsPage() {
     const q = query.trim().toLowerCase();
     return items.filter((n) => {
       if (q) {
-        const hay = `${n.title} ${n.description} ${n.event} ${n.refId ?? ""}`.toLowerCase();
+        const desc = typeof n.description === "string" ? n.description : "";
+        const hay = `${n.title} ${desc} ${n.event || ""} ${n.refId ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       if (status === "unread" && n.read) return false;
@@ -55,33 +51,43 @@ function NotificationsPage() {
   }, [items, query, status, type]);
 
   const selectClass =
-    "h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring";
+    "h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring font-medium";
 
   return (
     <div>
       <PageHeader
-        title="Notifications"
+        title="Notifications Center"
         description={
           unreadCount > 0
-            ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"} across your modules.`
-            : "You're all caught up on FlowDesk activity."
+            ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"} across your FlowDesk workspace.`
+            : "You're all caught up on workspace notifications."
         }
         actions={
-          <Button
-            variant="outline"
-            leftIcon={<CheckCheck className="h-4 w-4" />}
-            onClick={markAllRead}
-            disabled={unreadCount === 0}
-          >
-            Mark All as Read
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              leftIcon={<CheckCheck className="h-4 w-4" />}
+              onClick={markAllRead}
+              disabled={unreadCount === 0}
+            >
+              Mark All as Read
+            </Button>
+            <Button
+              variant="outline"
+              leftIcon={<Trash2 className="h-4 w-4" />}
+              onClick={clearAll}
+              disabled={items.length === 0}
+            >
+              Clear All
+            </Button>
+          </div>
         }
       />
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchBar
           className="flex-1"
-          placeholder="Search notifications…"
+          placeholder="Search notifications by keyword or ID…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -101,7 +107,7 @@ function NotificationsPage() {
           onChange={(e) => setType(e.target.value as "all" | NotificationType)}
           aria-label="Filter by type"
         >
-          <option value="all">All Types</option>
+          <option value="all">All Module Types</option>
           {NOTIFICATION_TYPES.map((t) => (
             <option key={t} value={t}>
               {NOTIFICATION_TYPE_LABELS[t]}
@@ -114,7 +120,7 @@ function NotificationsPage() {
         <EmptyState
           icon={<BellRing className="h-6 w-6" />}
           title="No notifications found"
-          description="Nothing matches your current search or filters. System events like ticket updates, leave decisions and meeting reminders will appear here."
+          description="Nothing matches your current search or filters. Real system events like ticket updates, leave approvals and meeting reminders will appear here."
         />
       ) : (
         <div className="space-y-3">

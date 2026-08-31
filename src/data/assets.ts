@@ -1,11 +1,5 @@
 export type AssetCategory =
-  | "Laptop"
-  | "Monitor"
-  | "Keyboard"
-  | "Mouse"
-  | "Headset"
-  | "Docking Station"
-  | "Charger";
+  "Laptop" | "Monitor" | "Keyboard" | "Mouse" | "Headset" | "Docking Station" | "Charger";
 
 export const ASSET_CATEGORIES: AssetCategory[] = [
   "Laptop",
@@ -18,13 +12,7 @@ export const ASSET_CATEGORIES: AssetCategory[] = [
 ];
 
 export type AssetStatus =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "assigned"
-  | "return_requested"
-  | "returned"
-  | "cancelled";
+  "pending" | "approved" | "rejected" | "assigned" | "return_requested" | "returned" | "cancelled";
 
 export const ASSET_STATUS_LABELS: Record<AssetStatus, string> = {
   pending: "Pending",
@@ -128,8 +116,7 @@ export const assets: AssetRequest[] = [
     status: "rejected",
     reviewedBy: "Rahul Verma",
     reviewedOn: "Jun 16, 2026",
-    rejectionReason:
-      "Mechanical keyboards are not part of the standard hardware catalog.",
+    rejectionReason: "Mechanical keyboards are not part of the standard hardware catalog.",
     comments: [
       {
         author: "Rahul Verma",
@@ -314,10 +301,7 @@ export const assets: AssetRequest[] = [
 
 /** Business rule: an employee cannot request the same category
  *  while one of that type is already assigned to them. */
-export function hasActiveAssignment(
-  employee: string,
-  category: AssetCategory,
-): boolean {
+export function hasActiveAssignment(employee: string, category: AssetCategory): boolean {
   return assets.some(
     (a) =>
       a.employee === employee &&

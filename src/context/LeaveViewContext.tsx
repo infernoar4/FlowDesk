@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { useRole } from "./RoleContext";
 
 export type LeaveView = "employee" | "manager";
 
@@ -10,9 +11,16 @@ interface LeaveViewContextValue {
 const LeaveViewContext = createContext<LeaveViewContextValue | undefined>(undefined);
 
 export function LeaveViewProvider({ children }: { children: ReactNode }) {
-  const [view, setView] = useState<LeaveView>("employee");
+  const { role } = useRole();
+  const [customView, setCustomView] = useState<LeaveView | null>(null);
+
+  const view: LeaveView =
+    role === "employee"
+      ? "employee"
+      : (customView ?? (role === "manager" ? "manager" : "employee"));
+
   return (
-    <LeaveViewContext.Provider value={{ view, setView }}>
+    <LeaveViewContext.Provider value={{ view, setView: setCustomView }}>
       {children}
     </LeaveViewContext.Provider>
   );

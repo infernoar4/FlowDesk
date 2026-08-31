@@ -222,11 +222,7 @@ export const leaves: LeaveRequest[] = [
 ];
 
 /** Simple placeholder overlap check used only by the Apply Leave form. */
-export function overlapsExisting(
-  employee: string,
-  startISO: string,
-  endISO: string,
-): boolean {
+export function overlapsExisting(employee: string, startISO: string, endISO: string): boolean {
   const s = new Date(startISO).getTime();
   const e = new Date(endISO).getTime();
   return leaves.some((l) => {

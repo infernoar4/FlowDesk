@@ -1,14 +1,7 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui-kit/Button";
-import {
-  NotificationIcon,
-  NotificationLink,
-} from "@/components/notifications/NotificationIcon";
-import {
-  NOTIFICATION_TYPE_LABELS,
-  relativeTime,
-  type Notification,
-} from "@/data/notifications";
+import { NotificationIcon, NotificationLink } from "@/components/notifications/NotificationIcon";
+import { NOTIFICATION_TYPE_LABELS, relativeTime, type Notification } from "@/data/notifications";
 
 interface Props {
   notification: Notification;

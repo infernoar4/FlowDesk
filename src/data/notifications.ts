@@ -3,12 +3,7 @@
  *  authoring UI. Replaced later by a backend feed / websocket stream. */
 
 export type NotificationType =
-  | "tickets"
-  | "leave"
-  | "assets"
-  | "meetings"
-  | "announcements"
-  | "system";
+  "tickets" | "leave" | "assets" | "meetings" | "announcements" | "system";
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   tickets: "Tickets",
@@ -89,7 +84,7 @@ export const notifications: Notification[] = [
     id: "NT-9009",
     type: "assets",
     event: "Asset Assigned",
-    title: "MacBook Pro 14\" assigned",
+    title: 'MacBook Pro 14" assigned',
     description: "Request AR-2050 fulfilled. Collect the device from IT Desk, Level 2.",
     minutesAgo: 96,
     read: false,

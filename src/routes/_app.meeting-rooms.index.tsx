@@ -17,17 +17,15 @@ import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadg
 import { RoomStatusBadge } from "@/components/meeting-rooms/RoomStatusBadge";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { useRole } from "@/context/RoleContext";
+import { useRooms } from "@/context/RoomContext";
+import { useAuth } from "@/context/AuthContext";
 import {
-  bookings,
   computeRoomStatus,
-  CURRENT_EMPLOYEE,
   CURRENT_SUPPORT,
   formatDate,
   formatTimeRange,
-  getRoom,
-  rooms,
   TODAY_ISO,
-  type Booking,
+  type RoomBooking,
 } from "@/data/rooms";
 
 export const Route = createFileRoute("/_app/meeting-rooms/")({
@@ -44,40 +42,44 @@ function MeetingRoomsDashboardRouter() {
 type BookingRow = {
   id: string;
   meeting: string;
-  employee: string;
+  organizer: string;
   room: string;
   date: string;
   time: string;
-  status: Booking["status"];
+  status: RoomBooking["status"];
 };
-
-function toRow(b: Booking): BookingRow {
-  const room = getRoom(b.roomId);
-  return {
-    id: b.id,
-    meeting: b.title,
-    employee: b.employee,
-    room: room?.name ?? b.roomId,
-    date: formatDate(b.date),
-    time: formatTimeRange(b.startTime, b.endTime),
-    status: b.status,
-  };
-}
 
 /* -------------------- Employee Dashboard -------------------- */
 
 function EmployeeDashboard() {
+  const { user } = useAuth();
+  const { bookings, rooms } = useRooms();
   const [bookOpen, setBookOpen] = useState(false);
 
+  const userName = user?.fullName || "Alex Lee";
+
   const mine = useMemo(
-    () => bookings.filter((b) => b.employee === CURRENT_EMPLOYEE),
-    [],
+    () => bookings.filter((b) => b.organizer === userName || b.organizer === "Alex Lee"),
+    [bookings, userName],
   );
   const today = mine.filter((b) => b.date === TODAY_ISO && b.status !== "cancelled");
   const upcoming = mine
-    .filter((b) => b.date >= TODAY_ISO && b.status === "booked")
+    .filter((b) => b.date >= TODAY_ISO && b.status !== "cancelled")
     .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
-  const active = mine.filter((b) => b.status === "booked");
+  const active = mine.filter((b) => b.status === "confirmed" || b.status === "checked_in");
+
+  const toRow = (b: RoomBooking): BookingRow => {
+    const r = rooms.find((room) => room.id === b.roomId);
+    return {
+      id: b.id,
+      meeting: b.title,
+      organizer: b.organizer ?? b.employee ?? "",
+      room: r?.name ?? b.roomName ?? b.roomId,
+      date: formatDate(b.date),
+      time: formatTimeRange(b.startTime, b.endTime),
+      status: b.status,
+    };
+  };
 
   const columns: Column<BookingRow>[] = [
     {
@@ -163,7 +165,7 @@ function EmployeeDashboard() {
                 See all bookings you've made.
               </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-primary-soft text-primary flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
               <ListChecks className="h-5 w-5" />
             </div>
           </Link>
@@ -201,10 +203,9 @@ function EmployeeDashboard() {
 /* -------------------- Support Dashboard -------------------- */
 
 function SupportDashboard() {
-  const todayBookings = bookings.filter(
-    (b) => b.date === TODAY_ISO && b.status !== "cancelled",
-  );
-  const active = bookings.filter((b) => b.status === "booked");
+  const { bookings, rooms } = useRooms();
+  const todayBookings = bookings.filter((b) => b.date === TODAY_ISO && b.status !== "cancelled");
+  const active = bookings.filter((b) => b.status === "confirmed" || b.status === "checked_in");
   const available = rooms.filter((r) => r.status === "available");
   const maintenance = rooms.filter((r) => r.status === "maintenance");
 
@@ -260,7 +261,10 @@ function SupportDashboard() {
         title="Rooms Overview"
         description="Current status of every meeting room"
         action={
-          <Link to="/meeting-rooms/rooms" className="text-xs font-medium text-primary hover:underline">
+          <Link
+            to="/meeting-rooms/rooms"
+            className="text-xs font-medium text-primary hover:underline"
+          >
             Manage rooms
           </Link>
         }
@@ -277,7 +281,7 @@ function SupportDashboard() {
                   {r.name}
                 </Link>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {r.floor} · Seats {r.capacity}
+                  {r.floor} · Seats {r.capacity} · {r.location}
                 </div>
               </div>
               <RoomStatusBadge status={computeRoomStatus(r)} />

@@ -3,6 +3,8 @@ import { BOOKING_STATUS_LABELS } from "@/data/rooms";
 
 const styles: Record<BookingStatus, string> = {
   booked: "bg-info/10 text-info",
+  confirmed: "bg-info/10 text-info",
+  checked_in: "bg-emerald-500/10 text-emerald-600",
   completed: "bg-success/15 text-success",
   cancelled: "bg-muted text-muted-foreground",
 };

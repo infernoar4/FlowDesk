@@ -8,7 +8,13 @@ interface DashboardCardProps {
   className?: string;
 }
 
-export function DashboardCard({ title, description, action, children, className = "" }: DashboardCardProps) {
+export function DashboardCard({
+  title,
+  description,
+  action,
+  children,
+  className = "",
+}: DashboardCardProps) {
   return (
     <section
       className={[
@@ -40,12 +46,18 @@ interface StatCardProps {
 
 export function StatCard({ label, value, delta, trend = "neutral", icon }: StatCardProps) {
   const trendColor =
-    trend === "up" ? "text-success" : trend === "down" ? "text-destructive" : "text-muted-foreground";
+    trend === "up"
+      ? "text-success"
+      : trend === "down"
+        ? "text-destructive"
+        : "text-muted-foreground";
   return (
     <div className="bg-card rounded-xl border border-border shadow-card p-5">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </div>
           <div className="mt-2 text-3xl font-semibold text-foreground">{value}</div>
           {delta && <div className={`mt-1 text-xs font-medium ${trendColor}`}>{delta}</div>}
         </div>

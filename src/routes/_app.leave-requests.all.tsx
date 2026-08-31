@@ -10,14 +10,9 @@ import { StatusBadge } from "@/components/ui-kit/StatusBadge";
 import { LeaveFormModal } from "@/components/leaves/LeaveFormModal";
 import { ManagerReviewModal } from "@/components/leaves/ManagerReviewModal";
 import { useLeaveView } from "@/context/LeaveViewContext";
-import {
-  CURRENT_EMPLOYEE,
-  LEAVE_TYPES,
-  leaves,
-  type LeaveRequest,
-  type LeaveStatus,
-  type LeaveType,
-} from "@/data/leaves";
+import { useLeaves } from "@/context/LeaveContext";
+import { useAuth } from "@/context/AuthContext";
+import { LEAVE_TYPES, type LeaveRequest, type LeaveStatus, type LeaveType } from "@/data/leaves";
 
 export const Route = createFileRoute("/_app/leave-requests/all")({
   head: () => ({ meta: [{ title: "Leave Requests — FlowDesk" }] }),
@@ -34,13 +29,15 @@ const STATUS_LABELS: Record<LeaveStatus, string> = {
 const STATUSES: LeaveStatus[] = ["pending", "approved", "rejected", "cancelled"];
 
 function LeaveRequestsPage() {
+  const { user } = useAuth();
+  const { leaves, cancelLeave } = useLeaves();
   const { view } = useLeaveView();
   const isManager = view === "manager";
 
+  const userName = user?.fullName || "Alex Morgan";
+
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<LeaveStatus | "all">(
-    isManager ? "pending" : "all",
-  );
+  const [status, setStatus] = useState<LeaveStatus | "all">(isManager ? "pending" : "all");
   const [type, setType] = useState<LeaveType | "all">("all");
   const [applyOpen, setApplyOpen] = useState(false);
   const [editing, setEditing] = useState<LeaveRequest | null>(null);
@@ -48,8 +45,11 @@ function LeaveRequestsPage() {
   const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null);
 
   const source = useMemo(
-    () => (isManager ? leaves : leaves.filter((l) => l.employee === CURRENT_EMPLOYEE)),
-    [isManager],
+    () =>
+      isManager
+        ? leaves
+        : leaves.filter((l) => l.employee === userName || l.employee === "Alex Morgan"),
+    [isManager, leaves, userName],
   );
 
   const filtered = useMemo(() => {
@@ -69,15 +69,7 @@ function LeaveRequestsPage() {
   }, [source, status, type, query]);
 
   const cancelable = (l: LeaveRequest) => {
-    if (l.status === "pending") return true;
-    // Approved requests can only be cancelled before the start date.
-    if (l.status === "approved") {
-      const today = new Date();
-      const start = new Date(l.startDate);
-      if (Number.isNaN(start.getTime())) return false;
-      return start.getTime() > today.getTime();
-    }
-    return false;
+    return l.status === "pending";
   };
 
   const columns: Column<LeaveRequest>[] = [
@@ -90,8 +82,12 @@ function LeaveRequestsPage() {
             className: "w-40",
             render: (l: LeaveRequest) => (
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-primary-soft text-primary flex items-center justify-center text-[10px] font-semibold shrink-0">
-                  {l.employee.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                <div className="h-7 w-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0">
+                  {l.employee
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)}
                 </div>
                 <span className="text-sm text-foreground truncate">{l.employee}</span>
               </div>
@@ -105,7 +101,9 @@ function LeaveRequestsPage() {
       header: "Duration",
       render: (l) => (
         <div className="text-sm">
-          <div className="text-foreground">{l.startDate} → {l.endDate}</div>
+          <div className="text-foreground">
+            {l.startDate} → {l.endDate}
+          </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             {l.days} day{l.days === 1 ? "" : "s"}
           </div>
@@ -132,20 +130,10 @@ function LeaveRequestsPage() {
           >
             View <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          {!isManager && l.status === "pending" && (
-            <button
-              onClick={() => setEditing(l)}
-              className="text-sm font-medium text-foreground hover:text-primary"
-            >
-              Edit
-            </button>
-          )}
           {!isManager && cancelable(l) && (
             <button
-              onClick={() => {
-                /* Placeholder — no backend wiring in this sprint. */
-              }}
-              className="text-sm font-medium text-destructive hover:underline"
+              onClick={() => cancelLeave(l.id)}
+              className="text-xs font-medium text-destructive hover:underline px-1"
             >
               Cancel
             </button>
@@ -212,7 +200,9 @@ function LeaveRequestsPage() {
           >
             <option value="all">All statuses</option>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
             ))}
           </select>
           <select
@@ -222,7 +212,9 @@ function LeaveRequestsPage() {
           >
             <option value="all">All types</option>
             {LEAVE_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </div>

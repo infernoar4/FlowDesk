@@ -28,15 +28,12 @@ export function BookingTimeline({ status }: Props) {
         const dotClass = s.failed
           ? "bg-destructive text-destructive-foreground"
           : s.done
-          ? s.current
-            ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
-            : "bg-primary text-primary-foreground"
-          : "bg-muted text-muted-foreground";
+            ? s.current
+              ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
+              : "bg-primary text-primary-foreground"
+            : "bg-muted text-muted-foreground";
         return (
-          <li
-            key={s.key}
-            className="flex sm:flex-col items-center sm:flex-1 gap-3 sm:gap-2"
-          >
+          <li key={s.key} className="flex sm:flex-col items-center sm:flex-1 gap-3 sm:gap-2">
             <div className="flex sm:flex-col items-center sm:w-full">
               <div className="flex items-center w-full">
                 <div

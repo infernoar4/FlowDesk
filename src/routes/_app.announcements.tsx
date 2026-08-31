@@ -12,18 +12,18 @@ import {
   type AnnouncementDraft,
 } from "@/components/announcements/AnnouncementFormModal";
 import { ConfirmActionModal } from "@/components/announcements/ConfirmActionModal";
-import { useRole, CURRENT_ENGINEER } from "@/context/RoleContext";
+import { useRole } from "@/context/RoleContext";
+import { useAuth } from "@/context/AuthContext";
+import { useAnnouncements } from "@/context/AnnouncementContext";
 import {
-  announcements as seedAnnouncements,
+  AUDIENCE_OPTIONS,
   CATEGORY_OPTIONS,
   PRIORITY_LABELS,
-  sortAnnouncements,
   STATUS_LABELS,
-  TODAY_ISO,
-  type Announcement,
   type AnnouncementCategory,
   type AnnouncementPriority,
   type AnnouncementStatus,
+  type Audience,
 } from "@/data/announcements";
 
 export const Route = createFileRoute("/_app/announcements")({
@@ -34,11 +34,6 @@ export const Route = createFileRoute("/_app/announcements")({
         name: "description",
         content:
           "Company-wide announcements from HR, IT and Leadership. Search, filter and track updates in FlowDesk.",
-      },
-      { property: "og:title", content: "Announcements — FlowDesk" },
-      {
-        property: "og:description",
-        content: "Company-wide announcements from HR, IT and Leadership inside FlowDesk.",
       },
     ],
   }),
@@ -55,79 +50,60 @@ type Dialog =
 
 function AnnouncementsPage() {
   const { role } = useRole();
-  const isSupport = role === "support";
+  const { user } = useAuth();
+  const { announcements, createAnnouncement, togglePin, deleteAnnouncement } = useAnnouncements();
+  const isSupport = role === "support" || role === "manager";
+  const canCreate = role === "manager" || user?.role === "manager";
 
-  const [items, setItems] = useState<Announcement[]>(seedAnnouncements);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"all" | AnnouncementCategory>("all");
   const [priority, setPriority] = useState<"all" | AnnouncementPriority>("all");
   const [status, setStatus] = useState<"all" | AnnouncementStatus>("all");
+  const [audience, setAudience] = useState<"all" | Audience>("all");
   const [dialog, setDialog] = useState<Dialog>({ kind: "none" });
 
   const selected = useMemo(
-    () => ("id" in dialog ? (items.find((a) => a.id === dialog.id) ?? null) : null),
-    [dialog, items],
+    () => ("id" in dialog ? (announcements.find((a) => a.id === dialog.id) ?? null) : null),
+    [dialog, announcements],
   );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sortAnnouncements(
-      items.filter((a) => {
-        if (q) {
-          const hay = `${a.title} ${a.category} ${a.author}`.toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
-        if (category !== "all" && a.category !== category) return false;
-        if (priority !== "all" && a.priority !== priority) return false;
-        if (status !== "all" && a.status !== status) return false;
-        return true;
-      }),
-    );
-  }, [items, query, category, priority, status]);
+    const result = announcements.filter((a) => {
+      if (q) {
+        const authorName = typeof a.author === "string" ? a.author : "";
+        const hay = `${a.title} ${a.category} ${authorName}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (category !== "all" && a.category !== category) return false;
+      if (priority !== "all" && a.priority !== priority) return false;
+      if (status !== "all" && a.status && a.status !== status) return false;
+      if (audience !== "all" && a.audience !== audience && a.audience !== "All Employees")
+        return false;
+      return true;
+    });
 
-  const unreadCount = items.filter((a) => !a.read && a.status === "active").length;
+    return result.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return b.id.localeCompare(a.id);
+    });
+  }, [announcements, query, category, priority, status, audience]);
 
-  const markRead = (id: string) =>
-    setItems((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)));
-
-  const togglePin = (target: Announcement) =>
-    setItems((prev) =>
-      prev.map((a) => (a.id === target.id ? { ...a, pinned: !a.pinned } : a)),
-    );
-
-  const archive = (id: string) => {
-    setItems((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: "archived", pinned: false } : a)),
-    );
-    setDialog({ kind: "none" });
-  };
-
-  const remove = (id: string) => {
-    setItems((prev) => prev.filter((a) => a.id !== id));
-    setDialog({ kind: "none" });
-  };
-
-  const createAnnouncement = (draft: AnnouncementDraft) => {
-    const next: Announcement = {
-      id: `ANN-${1042 + items.length}`,
-      ...draft,
-      status: "active",
-      author: CURRENT_ENGINEER,
-      authorRole: "Support Engineer",
-      createdOn: TODAY_ISO,
-      read: true,
-    };
-    setItems((prev) => [next, ...prev]);
-    setDialog({ kind: "none" });
-  };
-
-  const updateAnnouncement = (id: string, draft: AnnouncementDraft) => {
-    setItems((prev) => prev.map((a) => (a.id === id ? { ...a, ...draft } : a)));
+  const handleCreateDraft = (draft: AnnouncementDraft) => {
+    createAnnouncement({
+      title: draft.title,
+      category: draft.category,
+      body: draft.body,
+      summary: draft.summary,
+      priority: draft.priority,
+      pinned: draft.pinned,
+      audience: draft.audience,
+    });
     setDialog({ kind: "none" });
   };
 
   const selectClass =
-    "h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring";
+    "h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring font-medium";
 
   return (
     <div>
@@ -135,7 +111,7 @@ function AnnouncementsPage() {
         title="Announcements"
         description="Company-wide updates from HR, IT and Leadership."
         actions={
-          isSupport ? (
+          canCreate ? (
             <Button
               leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => setDialog({ kind: "create" })}
@@ -147,12 +123,12 @@ function AnnouncementsPage() {
       />
 
       <div className="bg-card rounded-xl border border-border shadow-card p-4 mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <SearchBar
             placeholder="Search by title, category or author…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="lg:col-span-2"
+            className="lg:col-span-1"
           />
           <select
             value={category}
@@ -164,6 +140,19 @@ function AnnouncementsPage() {
             {CATEGORY_OPTIONS.map((c) => (
               <option key={c} value={c}>
                 {c}
+              </option>
+            ))}
+          </select>
+          <select
+            value={audience}
+            onChange={(e) => setAudience(e.target.value as typeof audience)}
+            className={selectClass}
+            aria-label="Filter by audience"
+          >
+            <option value="all">All Audiences</option>
+            {AUDIENCE_OPTIONS.map((aud) => (
+              <option key={aud} value={aud}>
+                {aud}
               </option>
             ))}
           </select>
@@ -197,13 +186,8 @@ function AnnouncementsPage() {
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <span>
             Showing <span className="font-medium text-foreground">{filtered.length}</span> of{" "}
-            {items.length} announcements
+            {announcements.length} announcements
           </span>
-          {!isSupport && (
-            <span>
-              <span className="font-medium text-foreground">{unreadCount}</span> unread
-            </span>
-          )}
         </div>
       </div>
 
@@ -212,12 +196,12 @@ function AnnouncementsPage() {
           icon={<Megaphone className="h-6 w-6" />}
           title="No announcements found"
           description={
-            items.length === 0
+            announcements.length === 0
               ? "There are no announcements yet. Company-wide updates will appear here once published."
               : "No announcements match your current search and filters. Try clearing them to see more."
           }
           action={
-            items.length > 0 ? (
+            announcements.length > 0 ? (
               <Button
                 variant="outline"
                 onClick={() => {
@@ -249,31 +233,18 @@ function AnnouncementsPage() {
         announcement={dialog.kind === "details" ? selected : null}
         isSupport={isSupport}
         onClose={() => setDialog({ kind: "none" })}
-        onMarkRead={(id) => {
-          markRead(id);
-          setDialog({ kind: "none" });
-        }}
+        onMarkRead={() => setDialog({ kind: "none" })}
         onEdit={(a) => setDialog({ kind: "edit", id: a.id })}
         onDelete={(a) => setDialog({ kind: "delete", id: a.id })}
-        onArchive={(a) => setDialog({ kind: "archive", id: a.id })}
-        onTogglePin={togglePin}
+        onArchive={() => setDialog({ kind: "none" })}
+        onTogglePin={(item) => togglePin(item.id)}
       />
 
       {dialog.kind === "create" && (
         <AnnouncementFormModal
           open
           onClose={() => setDialog({ kind: "none" })}
-          onSubmit={createAnnouncement}
-        />
-      )}
-
-      {dialog.kind === "edit" && selected && (
-        <AnnouncementFormModal
-          open
-          key={selected.id}
-          announcement={selected}
-          onClose={() => setDialog({ kind: "none" })}
-          onSubmit={(draft) => updateAnnouncement(selected.id, draft)}
+          onSubmit={handleCreateDraft}
         />
       )}
 
@@ -282,21 +253,10 @@ function AnnouncementsPage() {
           open
           destructive
           title="Delete announcement?"
-          description={`"${selected.title}" will be permanently removed for all employees. This action cannot be undone.`}
+          description={`"${selected.title}" will be permanently removed. This action cannot be undone.`}
           confirmLabel="Delete Announcement"
           onClose={() => setDialog({ kind: "none" })}
-          onConfirm={() => remove(selected.id)}
-        />
-      )}
-
-      {dialog.kind === "archive" && selected && (
-        <ConfirmActionModal
-          open
-          title="Archive announcement?"
-          description={`"${selected.title}" will be moved to Archived, unpinned and hidden from the active feed. You can still find it using the Status filter.`}
-          confirmLabel="Archive Announcement"
-          onClose={() => setDialog({ kind: "none" })}
-          onConfirm={() => archive(selected.id)}
+          onConfirm={() => deleteAnnouncement(selected.id)}
         />
       )}
     </div>

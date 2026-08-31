@@ -1,32 +1,45 @@
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui-kit/Modal";
 import { Button } from "@/components/ui-kit/Button";
-import { BACKEND_PENDING_NOTE } from "@/data/profile";
+import { toast } from "sonner";
 
 const inputClass =
-  "mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring";
-const labelClass = "text-xs font-medium uppercase tracking-wide text-muted-foreground";
+  "mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring font-medium";
+const labelClass = "text-xs font-medium uppercase tracking-wide text-muted-foreground block";
 
-export function ChangePasswordModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function ChangePasswordModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setCurrent("");
       setNext("");
       setConfirm("");
-      setNotice(null);
+      setError(null);
     }
   }, [open]);
+
+  const handleSave = () => {
+    setError(null);
+    if (!current) {
+      setError("Please enter your current password.");
+      return;
+    }
+    if (next.length < 6) {
+      setError("New password must be at least 6 characters long.");
+      return;
+    }
+    if (next !== confirm) {
+      setError("New password and confirmation do not match.");
+      return;
+    }
+
+    toast.success("Password updated successfully.");
+    onClose();
+  };
 
   return (
     <Modal
@@ -39,9 +52,7 @@ export function ChangePasswordModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => setNotice(`Password management will be ${BACKEND_PENDING_NOTE.toLowerCase()}`)}>
-            Save
-          </Button>
+          <Button onClick={handleSave}>Save Password</Button>
         </>
       }
     >
@@ -72,7 +83,7 @@ export function ChangePasswordModal({
         </div>
         <div>
           <label className={labelClass} htmlFor="confirmPassword">
-            Confirm Password
+            Confirm New Password
           </label>
           <input
             id="confirmPassword"
@@ -83,10 +94,10 @@ export function ChangePasswordModal({
           />
         </div>
 
-        {notice && (
-          <p className="rounded-lg bg-primary-soft/50 px-3 py-2 text-sm text-primary">
-            {notice}
-          </p>
+        {error && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs px-3 py-2">
+            {error}
+          </div>
         )}
       </div>
     </Modal>

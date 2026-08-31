@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import {
-  LEAVE_TYPES,
-  type LeaveBalance,
-  type LeaveRequest,
-  type LeaveType,
-} from "@/data/leaves";
+import { LEAVE_TYPES, type LeaveBalance, type LeaveRequest, type LeaveType } from "@/data/leaves";
 import { db } from "./db";
-import { getCurrentEmployee, getCurrentManager, requireAuthenticatedUser } from "./authorization.server";
+import {
+  getCurrentEmployee,
+  getCurrentManager,
+  requireAuthenticatedUser,
+} from "./authorization.server";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -51,9 +50,7 @@ async function validateLeaveInput(data: {
   const reason = data.reason.trim();
   if (!reason) throw new Error("A leave reason is required.");
 
-  const [todayRows] = await db.query(
-    "SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS today",
-  );
+  const [todayRows] = await db.query("SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS today");
   const today = (todayRows as { today?: string }[])[0]?.today;
   if (!today || data.startDate < today) {
     throw new Error("Start date cannot be in the past.");
@@ -106,9 +103,7 @@ function formatDate(value: Date | string | null): string | undefined {
   // MySQL DATE values are returned as local-midnight Date objects. Preserve
   // their local calendar components before formatting, rather than converting
   // that instant to UTC and shifting the displayed day.
-  const calendarDate = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-  );
+  const calendarDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -118,9 +113,7 @@ function formatDate(value: Date | string | null): string | undefined {
   }).format(calendarDate);
 }
 
-export function mapDatabaseLeaveRequest(
-  leave: DatabaseLeaveRequest,
-): LeaveRequest {
+export function mapDatabaseLeaveRequest(leave: DatabaseLeaveRequest): LeaveRequest {
   return {
     id: leave.id,
     employee: leave.employee,
@@ -138,23 +131,21 @@ export function mapDatabaseLeaveRequest(
   };
 }
 
-export function mapDatabaseLeaveBalance(
-  balance: DatabaseLeaveBalance,
-): LeaveBalance {
+export function mapDatabaseLeaveBalance(balance: DatabaseLeaveBalance): LeaveBalance {
   const remaining = balance.remaining === null ? "Unlimited" : Number(balance.remaining);
   const total = balance.total === null ? "Unlimited" : Number(balance.total);
 
   return { type: balance.leave_type, remaining, total };
 }
 
-export const getLeaveRequests = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const currentUser = await requireAuthenticatedUser();
-    const managerView = currentUser.role === "manager";
-    const employee = currentUser.role === "employee" ? await getCurrentEmployee() : null;
-    if (managerView) await getCurrentManager();
-    if (!employee && !managerView) throw new Error("You are not authorized to view leave requests.");
-    const [rows] = await db.query(`
+export const getLeaveRequests = createServerFn({ method: "GET" }).handler(async () => {
+  const currentUser = await requireAuthenticatedUser();
+  const managerView = currentUser.role === "manager";
+  const employee = currentUser.role === "employee" ? await getCurrentEmployee() : null;
+  if (managerView) await getCurrentManager();
+  if (!employee && !managerView) throw new Error("You are not authorized to view leave requests.");
+  const [rows] = await db.query(
+    `
       SELECT
         lr.id,
         employee.full_name AS employee,
@@ -174,48 +165,46 @@ export const getLeaveRequests = createServerFn({ method: "GET" })
       LEFT JOIN users reviewer ON reviewer.id = lr.reviewed_by
       ${employee ? "WHERE lr.employee_id = ?" : ""}
       ORDER BY lr.applied_on DESC, lr.id DESC
-    `, employee ? [employee.id] : []);
+    `,
+    employee ? [employee.id] : [],
+  );
 
-    return rows as DatabaseLeaveRequest[];
-  });
+  return rows as DatabaseLeaveRequest[];
+});
 
-export const getLeaveBalances = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const employee = await getCurrentEmployee();
-    const [rows] = await db.query(
-      `
+export const getLeaveBalances = createServerFn({ method: "GET" }).handler(async () => {
+  const employee = await getCurrentEmployee();
+  const [rows] = await db.query(
+    `
         SELECT lb.leave_type, lb.remaining, lb.total
         FROM leave_balances lb
         JOIN users employee ON employee.id = lb.employee_id
         WHERE employee.id = ?
         ORDER BY lb.id
       `,
-      [employee.id],
-    );
+    [employee.id],
+  );
 
-    return rows as DatabaseLeaveBalance[];
-  });
+  return rows as DatabaseLeaveBalance[];
+});
 
-export const getEmployeePendingLeaveCount = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const employee = await getCurrentEmployee();
+export const getEmployeePendingLeaveCount = createServerFn({ method: "GET" }).handler(async () => {
+  const employee = await getCurrentEmployee();
 
-    const [countRows] = await db.query(
-      "SELECT COUNT(*) AS pending_count FROM leave_requests WHERE employee_id = ? AND status = 'pending'",
-      [employee.id],
-    );
-    const count = (countRows as { pending_count: number | string }[])[0];
+  const [countRows] = await db.query(
+    "SELECT COUNT(*) AS pending_count FROM leave_requests WHERE employee_id = ? AND status = 'pending'",
+    [employee.id],
+  );
+  const count = (countRows as { pending_count: number | string }[])[0];
 
-    return { pendingCount: Number(count?.pending_count ?? 0) };
-  },
-);
+  return { pendingCount: Number(count?.pending_count ?? 0) };
+});
 
-export const getManagerLeaveDashboard = createServerFn({ method: "GET" }).handler(
-  async () => {
-    await getCurrentManager();
+export const getManagerLeaveDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  await getCurrentManager();
 
-    const [countRows, pendingRows] = await Promise.all([
-      db.query(`
+  const [countRows, pendingRows] = await Promise.all([
+    db.query(`
         SELECT
           COALESCE(SUM(status = 'pending'), 0) AS pending_count,
           COALESCE(SUM(status = 'approved' AND reviewed_on = CURDATE()), 0) AS approved_today_count,
@@ -223,7 +212,7 @@ export const getManagerLeaveDashboard = createServerFn({ method: "GET" }).handle
           COALESCE(SUM(status = 'approved' AND start_date <= CURDATE() AND end_date >= CURDATE()), 0) AS on_leave_today_count
         FROM leave_requests
       `),
-      db.query(`
+    db.query(`
         SELECT
           lr.id,
           employee.full_name AS employee,
@@ -244,33 +233,29 @@ export const getManagerLeaveDashboard = createServerFn({ method: "GET" }).handle
         WHERE lr.status = 'pending'
         ORDER BY lr.applied_on DESC, lr.id DESC
       `),
-    ]);
+  ]);
 
-    const counts = (countRows[0] as {
+  const counts = (
+    countRows[0] as {
       pending_count: number | string;
       approved_today_count: number | string;
       rejected_today_count: number | string;
       on_leave_today_count: number | string;
-    }[])[0];
+    }[]
+  )[0];
 
-    return {
-      pendingCount: Number(counts?.pending_count ?? 0),
-      approvedTodayCount: Number(counts?.approved_today_count ?? 0),
-      rejectedTodayCount: Number(counts?.rejected_today_count ?? 0),
-      onLeaveTodayCount: Number(counts?.on_leave_today_count ?? 0),
-      pendingRequests: pendingRows[0] as DatabaseLeaveRequest[],
-    } satisfies ManagerLeaveDashboard;
-  },
-);
+  return {
+    pendingCount: Number(counts?.pending_count ?? 0),
+    approvedTodayCount: Number(counts?.approved_today_count ?? 0),
+    rejectedTodayCount: Number(counts?.rejected_today_count ?? 0),
+    onLeaveTodayCount: Number(counts?.on_leave_today_count ?? 0),
+    pendingRequests: pendingRows[0] as DatabaseLeaveRequest[],
+  } satisfies ManagerLeaveDashboard;
+});
 
 export const createLeaveRequest = createServerFn({ method: "POST" })
   .validator(
-    (input: {
-      type: LeaveType;
-      startDate: string;
-      endDate: string;
-      reason: string;
-    }) => input,
+    (input: { type: LeaveType; startDate: string; endDate: string; reason: string }) => input,
   )
   .handler(async ({ data }) => {
     const employee = await getCurrentEmployee();
@@ -400,7 +385,7 @@ export const updateLeaveRequest = createServerFn({ method: "POST" })
         [data.type, data.startDate, data.endDate, days, reason, data.leaveId, employee.id],
       );
 
-      if ((result as { affectedRows: number }).affectedRows !== 1) {
+      if ((result as unknown as { affectedRows: number }).affectedRows !== 1) {
         throw new Error("Only pending leave requests can be edited.");
       }
 
@@ -434,21 +419,13 @@ export const cancelLeaveRequest = createServerFn({ method: "POST" })
       [data.leaveId, employee.id],
     );
 
-    if ((result as { affectedRows: number }).affectedRows !== 1) {
-      throw new Error(
-        "This leave request can no longer be cancelled.",
-      );
+    if ((result as unknown as { affectedRows: number }).affectedRows !== 1) {
+      throw new Error("This leave request can no longer be cancelled.");
     }
   });
 
 export const reviewLeaveRequest = createServerFn({ method: "POST" })
-  .validator(
-    (input: {
-      leaveId: string;
-      action: "approve" | "reject";
-      comment: string;
-    }) => input,
-  )
+  .validator((input: { leaveId: string; action: "approve" | "reject"; comment: string }) => input)
   .handler(async ({ data }) => {
     const manager = await getCurrentManager();
     if (data.action !== "approve" && data.action !== "reject") {
@@ -480,7 +457,7 @@ export const reviewLeaveRequest = createServerFn({ method: "POST" })
       ],
     );
 
-    if ((result as { affectedRows: number }).affectedRows !== 1) {
+    if ((result as unknown as { affectedRows: number }).affectedRows !== 1) {
       throw new Error("This leave request is no longer awaiting review.");
     }
   });

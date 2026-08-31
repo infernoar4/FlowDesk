@@ -76,9 +76,7 @@ function formatAssetDate(value: Date | string | null): string | undefined {
 
   // MySQL DATE values represent a calendar date. Preserve its components so
   // a browser/server timezone cannot shift the date displayed by the UI.
-  const calendarDate = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-  );
+  const calendarDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -107,9 +105,7 @@ export function mapDatabaseAssetRequest(request: DatabaseAssetRequest): AssetReq
   };
 }
 
-export function mapDatabaseAssetRequestDetail(
-  request: DatabaseAssetRequestDetail,
-): AssetRequest {
+export function mapDatabaseAssetRequestDetail(request: DatabaseAssetRequestDetail): AssetRequest {
   return {
     ...mapDatabaseAssetRequest(request),
     comments: request.comments.map((comment) => ({
@@ -160,18 +156,16 @@ async function getAssetComments(requestId: string): Promise<DatabaseAssetComment
 }
 
 /** Employee-only request list, scoped by the fixed demo employee identity. */
-export const getEmployeeAssetRequests = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const employee = await getCurrentEmployee();
-    const [rows] = await db.query(
-      `${ASSET_REQUEST_SELECT}
+export const getEmployeeAssetRequests = createServerFn({ method: "GET" }).handler(async () => {
+  const employee = await getCurrentEmployee();
+  const [rows] = await db.query(
+    `${ASSET_REQUEST_SELECT}
        WHERE ar.employee_id = ?
        ORDER BY ar.requested_on DESC, ar.id DESC`,
-      [employee.id],
-    );
-    return rows as DatabaseAssetRequest[];
-  },
-);
+    [employee.id],
+  );
+  return rows as DatabaseAssetRequest[];
+});
 
 /** Employee-only detail read. A non-owned request is indistinguishable from missing. */
 export const getEmployeeAssetRequestById = createServerFn({ method: "GET" })
@@ -194,15 +188,14 @@ export const getEmployeeAssetRequestById = createServerFn({ method: "GET" })
   });
 
 /** Support-only queue. The selected demo engineer is verified against users.role. */
-export const getSupportAssetRequests = createServerFn({ method: "GET" })
-  .handler(async () => {
-    await getCurrentSupportEngineer();
-    const [rows] = await db.query(
-      `${ASSET_REQUEST_SELECT}
+export const getSupportAssetRequests = createServerFn({ method: "GET" }).handler(async () => {
+  await getCurrentSupportEngineer();
+  const [rows] = await db.query(
+    `${ASSET_REQUEST_SELECT}
        ORDER BY ar.requested_on DESC, ar.id DESC`,
-    );
-    return rows as DatabaseAssetRequest[];
-  });
+  );
+  return rows as DatabaseAssetRequest[];
+});
 
 /** Support-only request detail, including the persisted request comments. */
 export const getSupportAssetRequestById = createServerFn({ method: "GET" })
@@ -225,11 +218,10 @@ export const getSupportAssetRequestById = createServerFn({ method: "GET" })
   });
 
 /** Support-only inventory read for later asset-assignment UI wiring. */
-export const getAvailablePhysicalAssets = createServerFn({ method: "GET" })
-  .handler(async () => {
-    await getCurrentSupportEngineer();
-    const [rows] = await db.query(
-      `
+export const getAvailablePhysicalAssets = createServerFn({ method: "GET" }).handler(async () => {
+  await getCurrentSupportEngineer();
+  const [rows] = await db.query(
+    `
         SELECT
           pa.id,
           pa.name,
@@ -242,85 +234,88 @@ export const getAvailablePhysicalAssets = createServerFn({ method: "GET" })
         WHERE pa.status = 'available'
         ORDER BY pa.category, pa.name, pa.id
       `,
-    );
-    return rows as DatabasePhysicalAsset[];
-  });
+  );
+  return rows as DatabasePhysicalAsset[];
+});
 
 /** Employee-only dashboard reads, scoped to the current placeholder employee. */
-export const getEmployeeAssetDashboard = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const employee = await getCurrentEmployee();
-    const [countRows, recentRows] = await Promise.all([
-      db.query(
-        `
+export const getEmployeeAssetDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  const employee = await getCurrentEmployee();
+  const [countRows, recentRows] = await Promise.all([
+    db.query(
+      `
           SELECT
             COALESCE(SUM(status IN ('assigned', 'return_requested')), 0) AS assigned_asset_count,
             COALESCE(SUM(status = 'pending'), 0) AS pending_request_count
           FROM asset_requests
           WHERE employee_id = ?
         `,
-        [employee.id],
-      ),
-      db.query(
-        `${ASSET_REQUEST_SELECT}
+      [employee.id],
+    ),
+    db.query(
+      `${ASSET_REQUEST_SELECT}
          WHERE ar.employee_id = ?
          ORDER BY ar.requested_on DESC, ar.id DESC
          LIMIT 4`,
-        [employee.id],
-      ),
-    ]);
-    const counts = (countRows[0] as {
+      [employee.id],
+    ),
+  ]);
+  const counts = (
+    countRows[0] as {
       assigned_asset_count: number | string;
       pending_request_count: number | string;
-    }[])[0];
+    }[]
+  )[0];
 
-    return {
-      employeeName: employee.fullName,
-      assignedAssetCount: Number(counts?.assigned_asset_count ?? 0),
-      pendingRequestCount: Number(counts?.pending_request_count ?? 0),
-      recentRequests: recentRows[0] as DatabaseAssetRequest[],
-    } satisfies EmployeeAssetDashboard;
-  },
-);
+  return {
+    employeeName: employee.fullName,
+    assignedAssetCount: Number(counts?.assigned_asset_count ?? 0),
+    pendingRequestCount: Number(counts?.pending_request_count ?? 0),
+    recentRequests: recentRows[0] as DatabaseAssetRequest[],
+  } satisfies EmployeeAssetDashboard;
+});
 
 /** Support-only operational dashboard reads using database dates, not UI strings. */
-export const getSupportAssetDashboard = createServerFn({ method: "GET" })
-  .handler(async () => {
-    await getCurrentSupportEngineer();
-    const [requestCountRows, assetCountRows, pendingRows] = await Promise.all([
-      db.query(`
+export const getSupportAssetDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  await getCurrentSupportEngineer();
+  const [requestCountRows, assetCountRows, pendingRows] = await Promise.all([
+    db.query(`
         SELECT
           COALESCE(SUM(status = 'pending'), 0) AS pending_request_count,
           COALESCE(SUM(assigned_on = CURDATE()), 0) AS assigned_today_count,
           COALESCE(SUM(returned_on = CURDATE()), 0) AS returned_today_count
         FROM asset_requests
       `),
-      db.query(
-        "SELECT COUNT(*) AS available_asset_count FROM physical_assets WHERE status = 'available'",
-      ),
-      db.query(`
+    db.query(
+      "SELECT COUNT(*) AS available_asset_count FROM physical_assets WHERE status = 'available'",
+    ),
+    db.query(`
         ${ASSET_REQUEST_SELECT}
         WHERE ar.status = 'pending'
         ORDER BY ar.requested_on DESC, ar.id DESC
       `),
-    ]);
-    const requestCounts = (requestCountRows[0] as {
+  ]);
+  const requestCounts = (
+    requestCountRows[0] as {
       pending_request_count: number | string;
       assigned_today_count: number | string;
       returned_today_count: number | string;
-    }[])[0];
-    const assetCounts = (assetCountRows[0] as {
+    }[]
+  )[0];
+  const assetCounts = (
+    assetCountRows[0] as {
       available_asset_count: number | string;
-    }[])[0];
+    }[]
+  )[0];
 
-    return {
-      pendingRequestCount: Number(requestCounts?.pending_request_count ?? 0),
-      assignedTodayCount: Number(requestCounts?.assigned_today_count ?? 0),
-      returnedTodayCount: Number(requestCounts?.returned_today_count ?? 0),
-      availableAssetCount: Number(assetCounts?.available_asset_count ?? 0),
-      pendingRequests: pendingRows[0] as DatabaseAssetRequest[],
-    } satisfies SupportAssetDashboard;
-  });
+  return {
+    pendingRequestCount: Number(requestCounts?.pending_request_count ?? 0),
+    assignedTodayCount: Number(requestCounts?.assigned_today_count ?? 0),
+    returnedTodayCount: Number(requestCounts?.returned_today_count ?? 0),
+    availableAssetCount: Number(assetCounts?.available_asset_count ?? 0),
+    pendingRequests: pendingRows[0] as DatabaseAssetRequest[],
+  } satisfies SupportAssetDashboard;
+});
 
 const MAX_ASSET_REASON_LENGTH = 2_000;
 const MAX_ASSET_COMMENT_LENGTH = 2_000;
@@ -394,7 +389,9 @@ async function assertNoActiveAssetAssignment(
     [employeeId, category],
   );
   if ((rows as { id: string }[]).length > 0) {
-    throw new Error(`You already have a ${category.toLowerCase()} assigned. Return it before requesting another.`);
+    throw new Error(
+      `You already have a ${category.toLowerCase()} assigned. Return it before requesting another.`,
+    );
   }
 }
 
@@ -428,10 +425,9 @@ export const createAssetRequest = createServerFn({ method: "POST" })
         [id, employee.id, data.category, reason],
       );
 
-      const [rows] = await connection.query(
-        `${ASSET_REQUEST_SELECT} WHERE ar.id = ? LIMIT 1`,
-        [id],
-      );
+      const [rows] = await connection.query(`${ASSET_REQUEST_SELECT} WHERE ar.id = ? LIMIT 1`, [
+        id,
+      ]);
       const request = (rows as DatabaseAssetRequest[])[0];
       if (!request) throw new Error("Unable to load the new asset request.");
       await connection.commit();
@@ -446,18 +442,22 @@ export const createAssetRequest = createServerFn({ method: "POST" })
   });
 
 export const reviewAssetRequest = createServerFn({ method: "POST" })
-  .validator((input: { id: string; decision: "approve" | "reject"; rejectionReason?: string }) => input)
+  .validator(
+    (input: { id: string; decision: "approve" | "reject"; rejectionReason?: string }) => input,
+  )
   .handler(async ({ data }) => {
     const support = await getCurrentSupportEngineer();
     if (data.decision !== "approve" && data.decision !== "reject") {
       throw new Error("Invalid asset review decision.");
     }
-    const rejectionReason = data.decision === "reject"
-      ? validateAssetComment(data.rejectionReason ?? "", "A rejection reason")
-      : null;
-    const approvalComment = data.decision === "approve" && data.rejectionReason?.trim()
-      ? validateAssetComment(data.rejectionReason, "Support comment")
-      : null;
+    const rejectionReason =
+      data.decision === "reject"
+        ? validateAssetComment(data.rejectionReason ?? "", "A rejection reason")
+        : null;
+    const approvalComment =
+      data.decision === "approve" && data.rejectionReason?.trim()
+        ? validateAssetComment(data.rejectionReason, "Support comment")
+        : null;
     const connection = await db.getConnection();
     let transactionStarted = false;
 
@@ -479,9 +479,14 @@ export const reviewAssetRequest = createServerFn({ method: "POST" })
           SET status = ?, reviewed_by = ?, reviewed_on = CURDATE(), rejection_reason = ?
           WHERE id = ? AND status = 'pending'
         `,
-        [data.decision === "approve" ? "approved" : "rejected", support.id, rejectionReason, data.id],
+        [
+          data.decision === "approve" ? "approved" : "rejected",
+          support.id,
+          rejectionReason,
+          data.id,
+        ],
       );
-      if ((result as { affectedRows: number }).affectedRows !== 1) {
+      if ((result as unknown as { affectedRows: number }).affectedRows !== 1) {
         throw new Error("This asset request is no longer awaiting review.");
       }
 
@@ -491,7 +496,7 @@ export const reviewAssetRequest = createServerFn({ method: "POST" })
         support.id,
         data.decision === "reject"
           ? rejectionReason!
-          : approvalComment ?? "Approved asset request.",
+          : (approvalComment ?? "Approved asset request."),
       );
       await connection.commit();
     } catch (error) {
@@ -503,7 +508,15 @@ export const reviewAssetRequest = createServerFn({ method: "POST" })
   });
 
 export const assignPhysicalAsset = createServerFn({ method: "POST" })
-  .validator((input: { id: string; assetId: string; assetName?: string; assignedDate?: string; supportComment?: string }) => input)
+  .validator(
+    (input: {
+      id: string;
+      assetId: string;
+      assetName?: string;
+      assignedDate?: string;
+      supportComment?: string;
+    }) => input,
+  )
   .handler(async ({ data }) => {
     const support = await getCurrentSupportEngineer();
     const assetId = data.assetId.trim();
@@ -521,7 +534,14 @@ export const assignPhysicalAsset = createServerFn({ method: "POST" })
         "SELECT id, employee_id, category, status FROM asset_requests WHERE id = ? FOR UPDATE",
         [data.id],
       );
-      const request = (requestRows as { id: string; employee_id: number; category: AssetCategory; status: AssetStatus }[])[0];
+      const request = (
+        requestRows as {
+          id: string;
+          employee_id: number;
+          category: AssetCategory;
+          status: AssetStatus;
+        }[]
+      )[0];
       if (!request || request.status !== "approved") {
         throw new Error("Only approved asset requests can be assigned.");
       }
@@ -530,10 +550,20 @@ export const assignPhysicalAsset = createServerFn({ method: "POST" })
         "SELECT id, name, category, status, assigned_to FROM physical_assets WHERE id = ? FOR UPDATE",
         [assetId],
       );
-      const asset = (assetRows as { id: string; name: string; category: AssetCategory; status: string; assigned_to: number | null }[])[0];
+      const asset = (
+        assetRows as {
+          id: string;
+          name: string;
+          category: AssetCategory;
+          status: string;
+          assigned_to: number | null;
+        }[]
+      )[0];
       if (!asset) throw new Error("Selected physical asset was not found.");
-      if (asset.status !== "available") throw new Error("Selected physical asset is no longer available.");
-      if (asset.category !== request.category) throw new Error("Selected physical asset does not match the requested category.");
+      if (asset.status !== "available")
+        throw new Error("Selected physical asset is no longer available.");
+      if (asset.category !== request.category)
+        throw new Error("Selected physical asset does not match the requested category.");
 
       const [requestResult] = await connection.query(
         `
@@ -543,7 +573,7 @@ export const assignPhysicalAsset = createServerFn({ method: "POST" })
         `,
         [asset.id, asset.name, request.id],
       );
-      if ((requestResult as { affectedRows: number }).affectedRows !== 1) {
+      if ((requestResult as unknown as { affectedRows: number }).affectedRows !== 1) {
         throw new Error("Only approved asset requests can be assigned.");
       }
       const [assetResult] = await connection.query(
@@ -554,7 +584,7 @@ export const assignPhysicalAsset = createServerFn({ method: "POST" })
         `,
         [request.employee_id, asset.id],
       );
-      if ((assetResult as { affectedRows: number }).affectedRows !== 1) {
+      if ((assetResult as unknown as { affectedRows: number }).affectedRows !== 1) {
         throw new Error("Selected physical asset is no longer available.");
       }
 
@@ -587,14 +617,21 @@ export const requestAssetReturn = createServerFn({ method: "POST" })
         [data.id],
       );
       const request = (rows as { id: string; employee_id: number; status: AssetStatus }[])[0];
-      if (!request || request.employee_id !== employee.id) throw new Error("Asset request not found.");
+      if (!request || request.employee_id !== employee.id)
+        throw new Error("Asset request not found.");
       if (request.status !== "assigned") throw new Error("Only assigned assets can be returned.");
       const [result] = await connection.query(
         "UPDATE asset_requests SET status = 'return_requested', return_requested_on = CURDATE() WHERE id = ? AND employee_id = ? AND status = 'assigned'",
         [request.id, employee.id],
       );
-      if ((result as { affectedRows: number }).affectedRows !== 1) throw new Error("Only assigned assets can be returned.");
-      await insertAssetComment(connection, request.id, employee.id, "Requested return of the asset.");
+      if ((result as unknown as { affectedRows: number }).affectedRows !== 1)
+        throw new Error("Only assigned assets can be returned.");
+      await insertAssetComment(
+        connection,
+        request.id,
+        employee.id,
+        "Requested return of the asset.",
+      );
       await connection.commit();
     } catch (error) {
       if (transactionStarted) await connection.rollback();
@@ -618,13 +655,16 @@ export const cancelAssetRequest = createServerFn({ method: "POST" })
         [data.id],
       );
       const request = (rows as { id: string; employee_id: number; status: AssetStatus }[])[0];
-      if (!request || request.employee_id !== employee.id) throw new Error("Asset request not found.");
-      if (request.status !== "pending") throw new Error("Only pending asset requests can be cancelled.");
+      if (!request || request.employee_id !== employee.id)
+        throw new Error("Asset request not found.");
+      if (request.status !== "pending")
+        throw new Error("Only pending asset requests can be cancelled.");
       const [result] = await connection.query(
         "UPDATE asset_requests SET status = 'cancelled' WHERE id = ? AND employee_id = ? AND status = 'pending'",
         [request.id, employee.id],
       );
-      if ((result as { affectedRows: number }).affectedRows !== 1) throw new Error("Only pending asset requests can be cancelled.");
+      if ((result as unknown as { affectedRows: number }).affectedRows !== 1)
+        throw new Error("Only pending asset requests can be cancelled.");
       await insertAssetComment(connection, request.id, employee.id, "Cancelled asset request.");
       await connection.commit();
     } catch (error) {
@@ -651,15 +691,26 @@ export const completeAssetReturn = createServerFn({ method: "POST" })
         "SELECT id, employee_id, asset_id, asset_name, status FROM asset_requests WHERE id = ? FOR UPDATE",
         [data.id],
       );
-      const request = (requestRows as { id: string; employee_id: number; asset_id: string | null; asset_name: string | null; status: AssetStatus }[])[0];
-      if (!request || request.status !== "return_requested") throw new Error("This asset return is no longer awaiting verification.");
+      const request = (
+        requestRows as {
+          id: string;
+          employee_id: number;
+          asset_id: string | null;
+          asset_name: string | null;
+          status: AssetStatus;
+        }[]
+      )[0];
+      if (!request || request.status !== "return_requested")
+        throw new Error("This asset return is no longer awaiting verification.");
       if (!request.asset_id) throw new Error("This asset request has no assigned physical asset.");
 
       const [assetRows] = await connection.query(
         "SELECT id, name, status, assigned_to FROM physical_assets WHERE id = ? FOR UPDATE",
         [request.asset_id],
       );
-      const asset = (assetRows as { id: string; name: string; status: string; assigned_to: number | null }[])[0];
+      const asset = (
+        assetRows as { id: string; name: string; status: string; assigned_to: number | null }[]
+      )[0];
       if (!asset || asset.status !== "assigned" || asset.assigned_to !== request.employee_id) {
         throw new Error("The assigned physical asset relationship could not be verified.");
       }
@@ -668,13 +719,20 @@ export const completeAssetReturn = createServerFn({ method: "POST" })
         "UPDATE asset_requests SET status = 'returned', returned_on = CURDATE() WHERE id = ? AND status = 'return_requested'",
         [request.id],
       );
-      if ((requestResult as { affectedRows: number }).affectedRows !== 1) throw new Error("This asset return is no longer awaiting verification.");
+      if ((requestResult as unknown as { affectedRows: number }).affectedRows !== 1)
+        throw new Error("This asset return is no longer awaiting verification.");
       const [assetResult] = await connection.query(
         "UPDATE physical_assets SET status = 'available', assigned_to = NULL, assigned_on = NULL WHERE id = ? AND status = 'assigned' AND assigned_to = ?",
         [asset.id, request.employee_id],
       );
-      if ((assetResult as { affectedRows: number }).affectedRows !== 1) throw new Error("The assigned physical asset relationship could not be verified.");
-      await insertAssetComment(connection, request.id, support.id, supportComment ?? `Return verified for ${asset.name} (${asset.id}).`);
+      if ((assetResult as unknown as { affectedRows: number }).affectedRows !== 1)
+        throw new Error("The assigned physical asset relationship could not be verified.");
+      await insertAssetComment(
+        connection,
+        request.id,
+        support.id,
+        supportComment ?? `Return verified for ${asset.name} (${asset.id}).`,
+      );
       await connection.commit();
     } catch (error) {
       if (transactionStarted) await connection.rollback();
@@ -693,14 +751,17 @@ export const requestAssetAgain = createServerFn({ method: "POST" })
     let lockAcquired = false;
     try {
       lockAcquired = await acquireAssetRequestIdLock(connection);
-      if (!lockAcquired) throw new Error("Unable to create the new asset request. Please try again.");
+      if (!lockAcquired)
+        throw new Error("Unable to create the new asset request. Please try again.");
       await connection.beginTransaction();
       transactionStarted = true;
       const [sourceRows] = await connection.query(
         "SELECT category, reason, status FROM asset_requests WHERE id = ? AND employee_id = ? FOR UPDATE",
         [data.id, employee.id],
       );
-      const source = (sourceRows as { category: AssetCategory; reason: string; status: AssetStatus }[])[0];
+      const source = (
+        sourceRows as { category: AssetCategory; reason: string; status: AssetStatus }[]
+      )[0];
       if (!source) throw new Error("Asset request not found.");
       if (source.status !== "rejected" && source.status !== "cancelled") {
         throw new Error("Only rejected or cancelled asset requests can be submitted again.");
@@ -728,11 +789,12 @@ export const addAssetComment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const message = validateAssetComment(data.message);
     const currentUser = await requireAuthenticatedUser();
-    const author = currentUser.role === "support"
-      ? await getCurrentSupportEngineer()
-      : currentUser.role === "employee"
-        ? await getCurrentEmployee()
-        : null;
+    const author =
+      currentUser.role === "support"
+        ? await getCurrentSupportEngineer()
+        : currentUser.role === "employee"
+          ? await getCurrentEmployee()
+          : null;
     if (!author) throw new Error("You are not authorized to comment on asset requests.");
     const connection = await db.getConnection();
     let transactionStarted = false;

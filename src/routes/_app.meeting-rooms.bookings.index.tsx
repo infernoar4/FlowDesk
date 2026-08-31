@@ -6,16 +6,14 @@ import { DataTable, type Column } from "@/components/ui-kit/DataTable";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadge";
 import { useRole } from "@/context/RoleContext";
+import { useRooms } from "@/context/RoomContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   BOOKING_STATUS_LABELS,
-  bookings as allBookings,
-  CURRENT_EMPLOYEE,
   formatDate,
   formatTimeRange,
-  getRoom,
-  rooms,
-  type Booking,
   type BookingStatus,
+  type RoomBooking,
 } from "@/data/rooms";
 
 export const Route = createFileRoute("/_app/meeting-rooms/bookings/")({
@@ -26,29 +24,19 @@ export const Route = createFileRoute("/_app/meeting-rooms/bookings/")({
 type Row = {
   id: string;
   meeting: string;
-  employee: string;
+  organizer: string;
   room: string;
   date: string;
   time: string;
   status: BookingStatus;
 };
 
-function toRow(b: Booking): Row {
-  return {
-    id: b.id,
-    meeting: b.title,
-    employee: b.employee,
-    room: getRoom(b.roomId)?.name ?? b.roomId,
-    date: formatDate(b.date),
-    time: formatTimeRange(b.startTime, b.endTime),
-    status: b.status,
-  };
-}
-
 function BookingsPage() {
+  const { user } = useAuth();
+  const { bookings, rooms } = useRooms();
   const { role } = useRole();
-  const view = role;
-  const isSupport = view === "support";
+  const isSupport = role === "support";
+  const userName = user?.fullName || "Alex Lee";
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | BookingStatus>("all");
@@ -56,14 +44,20 @@ function BookingsPage() {
   const [date, setDate] = useState<string>("");
 
   const scoped = useMemo(
-    () => (isSupport ? allBookings : allBookings.filter((b) => b.employee === CURRENT_EMPLOYEE)),
-    [isSupport],
+    () =>
+      isSupport
+        ? bookings
+        : bookings.filter((b) => b.organizer === userName || b.organizer === "Alex Lee"),
+    [isSupport, bookings, userName],
   );
 
   const filtered = useMemo(() => {
     return scoped.filter((b) => {
+      const room = rooms.find((r) => r.id === b.roomId);
+      const roomName = room?.name ?? b.roomName ?? "";
+
       if (query) {
-        const hay = `${b.title} ${b.employee} ${getRoom(b.roomId)?.name ?? ""}`.toLowerCase();
+        const hay = `${b.title} ${b.organizer} ${roomName}`.toLowerCase();
         if (!hay.includes(query.toLowerCase())) return false;
       }
       if (status !== "all" && b.status !== status) return false;
@@ -71,7 +65,20 @@ function BookingsPage() {
       if (isSupport && date && b.date !== date) return false;
       return true;
     });
-  }, [scoped, query, status, roomId, date, isSupport]);
+  }, [scoped, query, status, roomId, date, isSupport, rooms]);
+
+  const toRow = (b: RoomBooking): Row => {
+    const room = rooms.find((r) => r.id === b.roomId);
+    return {
+      id: b.id,
+      meeting: b.title,
+      organizer: b.organizer ?? b.employee ?? "",
+      room: room?.name ?? b.roomName ?? b.roomId,
+      date: formatDate(b.date),
+      time: formatTimeRange(b.startTime, b.endTime),
+      status: b.status,
+    };
+  };
 
   const columns: Column<Row>[] = [
     {
@@ -87,7 +94,7 @@ function BookingsPage() {
         </Link>
       ),
     },
-    ...(isSupport ? [{ key: "employee", header: "Employee" } as Column<Row>] : []),
+    ...(isSupport ? [{ key: "organizer", header: "Organizer" } as Column<Row>] : []),
     { key: "room", header: "Room" },
     { key: "date", header: "Date" },
     { key: "time", header: "Time" },
@@ -104,8 +111,8 @@ function BookingsPage() {
         title={isSupport ? "All Bookings" : "My Bookings"}
         description={
           isSupport
-            ? "Search and manage every meeting room booking."
-            : "Search and track the bookings you've made."
+            ? "Search and manage every meeting room booking across all offices."
+            : "Search and track your reserved room bookings."
         }
       />
 
@@ -124,7 +131,9 @@ function BookingsPage() {
           >
             <option value="all">All Statuses</option>
             {(Object.keys(BOOKING_STATUS_LABELS) as BookingStatus[]).map((s) => (
-              <option key={s} value={s}>{BOOKING_STATUS_LABELS[s]}</option>
+              <option key={s} value={s}>
+                {BOOKING_STATUS_LABELS[s]}
+              </option>
             ))}
           </select>
           {isSupport && (
@@ -135,14 +144,16 @@ function BookingsPage() {
             >
               <option value="all">All Rooms</option>
               {rooms.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
               ))}
             </select>
           )}
         </div>
         {isSupport && (
           <div className="mt-3 flex items-center gap-2">
-            <label className="text-xs text-muted-foreground">Date:</label>
+            <label className="text-xs text-muted-foreground">Date Filter:</label>
             <input
               type="date"
               value={date}
@@ -168,7 +179,7 @@ function BookingsPage() {
         empty={
           <EmptyState
             title="No bookings found"
-            description="Try adjusting your search or filters."
+            description="Try adjusting your search query or status filter."
           />
         }
       />

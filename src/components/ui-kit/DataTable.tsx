@@ -13,7 +13,11 @@ interface DataTableProps<T> {
   empty?: ReactNode;
 }
 
-export function DataTable<T extends Record<string, any>>({ columns, data, empty }: DataTableProps<T>) {
+export function DataTable<T extends Record<string, unknown>>({
+  columns,
+  data,
+  empty,
+}: DataTableProps<T>) {
   if (data.length === 0 && empty) {
     return <>{empty}</>;
   }
@@ -39,7 +43,7 @@ export function DataTable<T extends Record<string, any>>({ columns, data, empty 
               <tr key={i} className="hover:bg-muted/40 transition-colors">
                 {columns.map((c) => (
                   <td key={c.key} className={`px-4 py-3 text-foreground ${c.className ?? ""}`}>
-                    {c.render ? c.render(row) : row[c.key]}
+                    {c.render ? c.render(row) : (row[c.key] as ReactNode)}
                   </td>
                 ))}
               </tr>

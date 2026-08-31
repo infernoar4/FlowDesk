@@ -5,8 +5,10 @@ import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { DataTable, type Column } from "@/components/ui-kit/DataTable";
 import { StatusBadge } from "@/components/ui-kit/StatusBadge";
 import { PriorityBadge } from "@/components/tickets/PriorityBadge";
-import { tickets, type Ticket } from "@/data/tickets";
+import { type Ticket } from "@/data/tickets";
 import { CURRENT_ENGINEER, useRole } from "@/context/RoleContext";
+import { useTickets } from "@/context/TicketContext";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/_app/assigned-tickets")({
   head: () => ({ meta: [{ title: "Assigned Tickets — FlowDesk" }] }),
@@ -15,6 +17,8 @@ export const Route = createFileRoute("/_app/assigned-tickets")({
 
 function AssignedTicketsPage() {
   const { role } = useRole();
+  const { user } = useAuth();
+  const { tickets } = useTickets();
 
   if (role !== "support") {
     return (
@@ -29,7 +33,14 @@ function AssignedTicketsPage() {
     );
   }
 
-  const mine = tickets.filter((t) => t.assignee === CURRENT_ENGINEER);
+  const currentEngineerName = user?.fullName || CURRENT_ENGINEER;
+  const mine = tickets.filter(
+    (t) =>
+      Boolean(t.assignee) &&
+      (t.assignee?.toLowerCase() === currentEngineerName.toLowerCase() ||
+        currentEngineerName.toLowerCase().includes((t.assignee || "").toLowerCase()) ||
+        (t.assignee || "").toLowerCase().includes(currentEngineerName.toLowerCase())),
+  );
 
   const columns: Column<Ticket>[] = [
     { key: "id", header: "Ticket ID", className: "font-mono text-xs text-muted-foreground w-28" },
@@ -81,7 +92,7 @@ function AssignedTicketsPage() {
     <div>
       <PageHeader
         title="Assigned Tickets"
-        description={`Tickets currently owned by ${CURRENT_ENGINEER}.`}
+        description={`Tickets currently assigned to Support Engineer ${currentEngineerName}.`}
       />
       <DataTable
         columns={columns}

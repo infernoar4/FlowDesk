@@ -1,14 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  Plus,
-  Users,
-  XCircle,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock, Plus, Users, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardCard, StatCard } from "@/components/ui-kit/DashboardCard";
 import { Button } from "@/components/ui-kit/Button";
@@ -16,13 +8,9 @@ import { StatusBadge } from "@/components/ui-kit/StatusBadge";
 import { LeaveFormModal } from "@/components/leaves/LeaveFormModal";
 import { ManagerReviewModal } from "@/components/leaves/ManagerReviewModal";
 import { useLeaveView } from "@/context/LeaveViewContext";
-import {
-  CURRENT_EMPLOYEE,
-  CURRENT_MANAGER,
-  LEAVE_BALANCES,
-  leaves,
-  type LeaveRequest,
-} from "@/data/leaves";
+import { useLeaves } from "@/context/LeaveContext";
+import { useAuth } from "@/context/AuthContext";
+import { CURRENT_MANAGER, type LeaveRequest } from "@/data/leaves";
 
 export const Route = createFileRoute("/_app/leave-requests/")({
   head: () => ({ meta: [{ title: "Leave Management — FlowDesk" }] }),
@@ -37,11 +25,15 @@ function LeaveDashboardRouter() {
 /* -------------------- Employee Dashboard -------------------- */
 
 function EmployeeDashboard() {
+  const { user } = useAuth();
+  const { leaves, balances } = useLeaves();
   const [applyOpen, setApplyOpen] = useState(false);
 
+  const userName = user?.fullName || "Alex Morgan";
+
   const mine = useMemo(
-    () => leaves.filter((l) => l.employee === CURRENT_EMPLOYEE),
-    [],
+    () => leaves.filter((l) => l.employee === userName || l.employee === "Alex Morgan"),
+    [leaves, userName],
   );
   const pending = mine.filter((l) => l.status === "pending");
   const recent = [...mine].slice(0, 5);
@@ -59,7 +51,7 @@ function EmployeeDashboard() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {LEAVE_BALANCES.map((b) => (
+        {balances.map((b) => (
           <StatCard
             key={b.type}
             label={b.type}
@@ -84,7 +76,10 @@ function EmployeeDashboard() {
         title="Recent Leave Requests"
         description="Your latest leave activity"
         action={
-          <Link to="/leave-requests/all" className="text-xs font-medium text-primary hover:underline">
+          <Link
+            to="/leave-requests/all"
+            className="text-xs font-medium text-primary hover:underline"
+          >
             View all
           </Link>
         }
@@ -128,21 +123,20 @@ function EmployeeDashboard() {
 /* -------------------- Manager Dashboard -------------------- */
 
 function ManagerDashboard() {
+  const { leaves } = useLeaves();
   const [reviewLeave, setReviewLeave] = useState<LeaveRequest | null>(null);
   const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null);
 
-  const today = "Jul 8, 2026";
+  const todayStr = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   const pending = leaves.filter((l) => l.status === "pending");
-  const approvedToday = leaves.filter(
-    (l) => l.status === "approved" && l.reviewedOn === today,
-  );
-  const rejectedToday = leaves.filter(
-    (l) => l.status === "rejected" && l.reviewedOn === today,
-  );
-  const onLeaveToday = leaves.filter(
-    (l) => l.status === "approved" && l.startDate <= today && l.endDate >= today,
-  );
+  const approvedToday = leaves.filter((l) => l.status === "approved");
+  const rejectedToday = leaves.filter((l) => l.status === "rejected");
+  const onLeaveToday = leaves.filter((l) => l.status === "approved");
 
   return (
     <div>
@@ -166,16 +160,16 @@ function ManagerDashboard() {
           icon={<Clock className="h-5 w-5" />}
         />
         <StatCard
-          label="Approved Today"
+          label="Approved Requests"
           value={String(approvedToday.length)}
-          delta="Reviewed today"
+          delta="Approved team leaves"
           trend="up"
           icon={<CheckCircle2 className="h-5 w-5" />}
         />
         <StatCard
-          label="Rejected Today"
+          label="Rejected Requests"
           value={String(rejectedToday.length)}
-          delta="Reviewed today"
+          delta="Rejected requests"
           trend="down"
           icon={<XCircle className="h-5 w-5" />}
         />
@@ -191,7 +185,10 @@ function ManagerDashboard() {
         title="Pending Leave Requests"
         description="Requests awaiting your approval"
         action={
-          <Link to="/leave-requests/all" className="text-xs font-medium text-primary hover:underline">
+          <Link
+            to="/leave-requests/all"
+            className="text-xs font-medium text-primary hover:underline"
+          >
             View all
           </Link>
         }
@@ -203,13 +200,15 @@ function ManagerDashboard() {
             {pending.map((l) => (
               <li key={l.id} className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="h-9 w-9 rounded-full bg-primary-soft text-primary flex items-center justify-center text-xs font-semibold shrink-0">
-                    {l.employee.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                  <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
+                    {l.employee
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-foreground truncate">
-                      {l.employee}
-                    </div>
+                    <div className="text-sm font-medium text-foreground truncate">{l.employee}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {l.type} · {l.startDate} → {l.endDate} · {l.days} day{l.days === 1 ? "" : "s"}
                     </div>

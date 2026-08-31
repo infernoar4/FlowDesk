@@ -1,12 +1,7 @@
 export type RoomStatus = "available" | "occupied" | "maintenance";
 
 export type Equipment =
-  | "Projector"
-  | "TV"
-  | "Video Conference"
-  | "Whiteboard"
-  | "Conference Phone"
-  | "HDMI";
+  "Projector" | "TV" | "Video Conference" | "Whiteboard" | "Conference Phone" | "HDMI";
 
 export const EQUIPMENT_OPTIONS: Equipment[] = [
   "Projector",
@@ -35,7 +30,7 @@ export type Room = {
   maintenanceLog?: MaintenanceLog[];
 };
 
-export type BookingStatus = "booked" | "completed" | "cancelled";
+export type BookingStatus = "booked" | "confirmed" | "checked_in" | "completed" | "cancelled";
 
 export type Booking = {
   id: string;
@@ -49,12 +44,45 @@ export type Booking = {
   endTime: string;
   notes?: string;
   status: BookingStatus;
-  createdOn: string;
+  createdOn?: string;
   cancelledOn?: string;
 };
 
-/** Reference "today" for deterministic mock data. */
-export const TODAY_ISO = "2026-07-11";
+export type RoomAmenity = Equipment;
+export type MeetingRoom = Room & {
+  location?: string;
+  amenities?: RoomAmenity[];
+};
+export type RoomBooking = Booking & {
+  organizer?: string;
+  roomName?: string;
+  attendeesCount?: number;
+};
+
+export const ROOM_STATUS_LABELS: Record<RoomStatus, string> = {
+  available: "Available",
+  occupied: "Occupied",
+  maintenance: "Under Maintenance",
+};
+
+export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
+  booked: "Confirmed",
+  confirmed: "Confirmed",
+  checked_in: "Checked In",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+/** Reference today in YYYY-MM-DD format. */
+export const getTodayISO = (): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export const TODAY_ISO = getTodayISO();
 
 export const CURRENT_EMPLOYEE = "Alex Morgan";
 export const CURRENT_SUPPORT = "Rahul Verma";
@@ -115,8 +143,7 @@ export const rooms: Room[] = [
     capacity: 4,
     equipment: ["TV", "Video Conference"],
     status: "available",
-    description:
-      "Small private room for candidate interviews and one-on-one conversations.",
+    description: "Small private room for candidate interviews and one-on-one conversations.",
   },
   {
     id: "RM-006",
@@ -270,18 +297,6 @@ export const bookings: Booking[] = [
     createdOn: "Jul 2, 2026",
   },
 ];
-
-export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
-  booked: "Booked",
-  completed: "Completed",
-  cancelled: "Cancelled",
-};
-
-export const ROOM_STATUS_LABELS: Record<RoomStatus, string> = {
-  available: "Available",
-  occupied: "Occupied",
-  maintenance: "Under Maintenance",
-};
 
 export function getRoom(id: string): Room | undefined {
   return rooms.find((r) => r.id === id);

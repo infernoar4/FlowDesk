@@ -24,10 +24,7 @@ export function AssetTimeline({ status }: AssetTimelineProps) {
     status === "return_requested" ||
     status === "returned" ||
     rejected;
-  const assigned =
-    status === "assigned" ||
-    status === "return_requested" ||
-    status === "returned";
+  const assigned = status === "assigned" || status === "return_requested" || status === "returned";
   const returnRequested = status === "return_requested" || status === "returned";
   const returned = status === "returned";
 
@@ -88,15 +85,12 @@ export function AssetTimeline({ status }: AssetTimelineProps) {
         const dotClass = s.failed
           ? "bg-destructive text-destructive-foreground"
           : s.done
-          ? s.current
-            ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
-            : "bg-primary text-primary-foreground"
-          : "bg-muted text-muted-foreground";
+            ? s.current
+              ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
+              : "bg-primary text-primary-foreground"
+            : "bg-muted text-muted-foreground";
         return (
-          <li
-            key={s.key}
-            className="flex sm:flex-col items-center sm:flex-1 gap-3 sm:gap-2"
-          >
+          <li key={s.key} className="flex sm:flex-col items-center sm:flex-1 gap-3 sm:gap-2">
             <div className="flex sm:flex-col items-center sm:w-full">
               <div
                 className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${dotClass}`}

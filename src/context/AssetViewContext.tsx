@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { useRole } from "./RoleContext";
 
 export type AssetView = "employee" | "support";
 
@@ -10,9 +11,17 @@ interface AssetViewContextValue {
 const AssetViewContext = createContext<AssetViewContextValue | undefined>(undefined);
 
 export function AssetViewProvider({ children }: { children: ReactNode }) {
-  const [view, setView] = useState<AssetView>("employee");
+  const { role } = useRole();
+  const [customView, setCustomView] = useState<AssetView | null>(null);
+
+  // If top navbar role is explicitly set to "employee", honor Employee view; if "support", honor Support view unless custom override set
+  const view: AssetView =
+    role === "employee"
+      ? "employee"
+      : (customView ?? (role === "support" ? "support" : "employee"));
+
   return (
-    <AssetViewContext.Provider value={{ view, setView }}>
+    <AssetViewContext.Provider value={{ view, setView: setCustomView }}>
       {children}
     </AssetViewContext.Provider>
   );

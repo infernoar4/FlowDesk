@@ -16,7 +16,9 @@ const [identifier] = process.argv.slice(2);
 const password = process.env.FLOWDESK_INITIAL_PASSWORD;
 
 if (!identifier || !password) {
-  console.error("Usage: FLOWDESK_INITIAL_PASSWORD=<at-least-12-character-secret> npm run auth:set-password -- <username-or-email>");
+  console.error(
+    "Usage: FLOWDESK_INITIAL_PASSWORD=<at-least-12-character-secret> npm run auth:set-password -- <username-or-email>",
+  );
   process.exitCode = 1;
 } else {
   const [{ setInitialPassword }, { db }] = await Promise.all([

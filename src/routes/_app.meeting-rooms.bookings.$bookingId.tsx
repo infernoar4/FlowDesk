@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, CalendarDays, Clock, DoorOpen, Pencil, StickyNote, User, X } from "lucide-react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  DoorOpen,
+  Pencil,
+  StickyNote,
+  User,
+  X,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
@@ -8,105 +18,124 @@ import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadg
 import { BookingTimeline } from "@/components/meeting-rooms/BookingTimeline";
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { useRole } from "@/context/RoleContext";
-import {
-  bookings,
-  CURRENT_EMPLOYEE,
-  formatDate,
-  formatTimeRange,
-  getRoom,
-  isBeforeStart,
-  type Booking,
-} from "@/data/rooms";
+import { useRooms } from "@/context/RoomContext";
+import { useAuth } from "@/context/AuthContext";
+import { formatDate, formatTimeRange } from "@/data/rooms";
 
 export const Route = createFileRoute("/_app/meeting-rooms/bookings/$bookingId")({
-  head: () => ({ meta: [{ title: "Booking Details — FlowDesk" }] }),
-  loader: ({ params }): Booking => {
-    const b = bookings.find((x) => x.id === params.bookingId);
-    if (!b) throw notFound();
-    return b;
-  },
-  notFoundComponent: BookingNotFound,
+  head: ({ params }) => ({ meta: [{ title: `${params.bookingId} — FlowDesk` }] }),
   component: BookingDetailsPage,
 });
 
-function BookingNotFound() {
+function BackLink() {
   return (
-    <div>
-      <PageHeader title="Booking not found" description="This booking may have been removed." />
-      <Link to="/meeting-rooms/bookings" className="text-sm font-medium text-primary hover:underline">
-        ← Back to Bookings
-      </Link>
-    </div>
+    <Link
+      to="/meeting-rooms/bookings"
+      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" /> Back to Bookings
+    </Link>
   );
 }
 
 function BookingDetailsPage() {
-  const booking = Route.useLoaderData();
+  const { bookingId } = useParams({ from: "/_app/meeting-rooms/bookings/$bookingId" });
+  const { getBookingById, getRoomById, cancelBooking, checkInBooking } = useRooms();
+  const { user } = useAuth();
   const { role } = useRole();
-  const view = role;
-  const room = getRoom(booking.roomId);
-  const isOwner = booking.employee === CURRENT_EMPLOYEE && view !== "support";
-  const editable = isOwner && booking.status === "booked" && isBeforeStart(booking);
+
+  const booking = getBookingById(bookingId);
+  const room = booking ? getRoomById(booking.roomId) : undefined;
+  const isSupport = role === "support";
+  const userName = user?.fullName || "Alex Lee";
+  const isOwner = booking
+    ? booking.organizer === userName || booking.organizer === "Alex Lee"
+    : false;
 
   const [editOpen, setEditOpen] = useState(false);
+
+  if (!booking) {
+    return (
+      <div>
+        <BackLink />
+        <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center">
+          <h2 className="text-base font-semibold text-foreground">Booking not found</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The booking <code className="font-mono text-xs">{bookingId}</code> doesn't exist or was
+            removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isConfirmed = booking.status === "confirmed";
 
   return (
     <div>
       <div className="mb-4">
-        <Link
-          to="/meeting-rooms/bookings"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Bookings
-        </Link>
+        <BackLink />
       </div>
 
       <PageHeader
         title={booking.title}
-        description={`Booking ${booking.id} by ${booking.employee}`}
+        description={`Booking ${booking.id} by ${booking.organizer}`}
         actions={
-          isOwner && booking.status === "booked" ? (
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            {isConfirmed && (
               <Button
                 variant="outline"
-                leftIcon={<Pencil className="h-4 w-4" />}
-                onClick={() => setEditOpen(true)}
-                disabled={!editable}
-                title={!editable ? "Editing is only allowed before the meeting start time." : undefined}
+                leftIcon={<CheckCircle2 className="h-4 w-4" />}
+                onClick={() => checkInBooking(booking.id)}
               >
-                Edit Booking
+                Check In
               </Button>
-              <Button variant="destructive" leftIcon={<X className="h-4 w-4" />}>
-                Cancel Booking
-              </Button>
-            </div>
-          ) : undefined
+            )}
+            {(isOwner || isSupport) && isConfirmed && (
+              <>
+                <Button
+                  variant="outline"
+                  leftIcon={<Pencil className="h-4 w-4" />}
+                  onClick={() => setEditOpen(true)}
+                >
+                  Edit Booking
+                </Button>
+                <Button
+                  variant="destructive"
+                  leftIcon={<X className="h-4 w-4" />}
+                  onClick={() => cancelBooking(booking.id, "User requested cancellation.")}
+                >
+                  Cancel Booking
+                </Button>
+              </>
+            )}
+          </div>
         }
       />
 
       <div className="mb-6 flex items-center gap-2">
         <BookingStatusBadge status={booking.status} />
-        <span className="text-xs text-muted-foreground">Created {booking.createdOn}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <DashboardCard title="Booking Timeline">
+          <DashboardCard title="Booking Progress">
             <BookingTimeline status={booking.status} />
           </DashboardCard>
 
           <DashboardCard title="Meeting Information">
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <dt className="text-xs text-muted-foreground">Booked By</dt>
+                <dt className="text-xs text-muted-foreground">Organizer</dt>
                 <dd className="mt-1 flex items-center gap-1.5 text-foreground">
-                  <User className="h-4 w-4 text-muted-foreground" /> {booking.employee}
+                  <User className="h-4 w-4 text-muted-foreground" /> {booking.organizer}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Date</dt>
                 <dd className="mt-1 flex items-center gap-1.5 text-foreground">
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" /> {formatDate(booking.date)}
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />{" "}
+                  {formatDate(booking.date)}
                 </dd>
               </div>
               <div>
@@ -117,10 +146,8 @@ function BookingDetailsPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Status</dt>
-                <dd className="mt-1">
-                  <BookingStatusBadge status={booking.status} />
-                </dd>
+                <dt className="text-xs text-muted-foreground">Attendees</dt>
+                <dd className="mt-1 text-foreground">{booking.attendeesCount} people</dd>
               </div>
               {booking.notes && (
                 <div className="sm:col-span-2">
@@ -136,7 +163,7 @@ function BookingDetailsPage() {
         </div>
 
         <aside className="space-y-6">
-          <DashboardCard title="Room Information">
+          <DashboardCard title="Room Details">
             {room ? (
               <div className="space-y-2 text-sm">
                 <Link
@@ -146,13 +173,15 @@ function BookingDetailsPage() {
                 >
                   <DoorOpen className="h-4 w-4 text-muted-foreground" /> {room.name}
                 </Link>
-                <div className="text-xs text-muted-foreground">{room.floor}</div>
-                <div className="text-xs text-muted-foreground">Seats {room.capacity}</div>
+                <div className="text-xs text-muted-foreground">
+                  {room.floor} · {room.location}
+                </div>
+                <div className="text-xs text-muted-foreground">Capacity: {room.capacity} seats</div>
                 <div className="pt-2 flex flex-wrap gap-1.5">
-                  {room.equipment.map((e: string) => (
+                  {room.amenities?.map((e: string) => (
                     <span
                       key={e}
-                      className="inline-flex items-center rounded-md bg-primary-soft text-primary px-2 py-0.5 text-xs font-medium"
+                      className="inline-flex items-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium"
                     >
                       {e}
                     </span>
@@ -160,15 +189,11 @@ function BookingDetailsPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Room information unavailable.</p>
+              <p className="text-sm text-muted-foreground">
+                Room details for {booking.roomName || booking.roomId}.
+              </p>
             )}
           </DashboardCard>
-
-          {isOwner && booking.status === "booked" && !editable && (
-            <div className="rounded-lg border border-border bg-muted/40 text-xs text-muted-foreground p-3">
-              Editing is only allowed before the meeting start time.
-            </div>
-          )}
         </aside>
       </div>
 

@@ -11,11 +11,11 @@ import { AssetRequestModal } from "@/components/assets/AssetRequestModal";
 import { SupportReviewModal } from "@/components/assets/SupportReviewModal";
 import { AssignAssetModal } from "@/components/assets/AssignAssetModal";
 import { useAssetView } from "@/context/AssetViewContext";
+import { useAssets } from "@/context/AssetContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   ASSET_CATEGORIES,
   ASSET_STATUS_LABELS,
-  assets,
-  CURRENT_EMPLOYEE,
   type AssetCategory,
   type AssetRequest,
   type AssetStatus,
@@ -37,13 +37,15 @@ const STATUSES: AssetStatus[] = [
 ];
 
 function AssetRequestsPage() {
+  const { user } = useAuth();
+  const { assets, confirmReturn } = useAssets();
   const { view } = useAssetView();
   const isSupport = view === "support";
 
+  const userName = user?.fullName || "Alex Morgan";
+
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<AssetStatus | "all">(
-    isSupport ? "pending" : "all",
-  );
+  const [status, setStatus] = useState<AssetStatus | "all">(isSupport ? "pending" : "all");
   const [category, setCategory] = useState<AssetCategory | "all">("all");
   const [requestOpen, setRequestOpen] = useState(false);
   const [reviewRequest, setReviewRequest] = useState<AssetRequest | null>(null);
@@ -52,8 +54,10 @@ function AssetRequestsPage() {
 
   const source = useMemo(
     () =>
-      isSupport ? assets : assets.filter((a) => a.employee === CURRENT_EMPLOYEE),
-    [isSupport],
+      isSupport
+        ? assets
+        : assets.filter((a) => a.employee === userName || a.employee === "Alex Morgan"),
+    [isSupport, assets, userName],
   );
 
   const filtered = useMemo(() => {
@@ -84,8 +88,12 @@ function AssetRequestsPage() {
             className: "w-40",
             render: (a: AssetRequest) => (
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-primary-soft text-primary flex items-center justify-center text-[10px] font-semibold shrink-0">
-                  {a.employee.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                <div className="h-7 w-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0">
+                  {a.employee
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)}
                 </div>
                 <span className="text-sm text-foreground truncate">{a.employee}</span>
               </div>
@@ -101,9 +109,7 @@ function AssetRequestsPage() {
         a.assetId ? (
           <div className="text-sm">
             <div className="text-foreground">{a.assetName}</div>
-            <div className="text-xs font-mono text-muted-foreground mt-0.5">
-              {a.assetId}
-            </div>
+            <div className="text-xs font-mono text-muted-foreground mt-0.5">{a.assetId}</div>
           </div>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
@@ -133,16 +139,6 @@ function AssetRequestsPage() {
           >
             View <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          {!isSupport && a.status === "pending" && (
-            <button
-              onClick={() => {
-                /* Placeholder — no backend wiring in this sprint. */
-              }}
-              className="text-sm font-medium text-destructive hover:underline"
-            >
-              Cancel
-            </button>
-          )}
           {isSupport && a.status === "pending" && (
             <>
               <Button
@@ -172,12 +168,7 @@ function AssetRequestsPage() {
             </Button>
           )}
           {isSupport && a.status === "return_requested" && (
-            <Button
-              size="sm"
-              onClick={() => {
-                /* Placeholder — no backend wiring in this sprint. */
-              }}
-            >
+            <Button size="sm" onClick={() => confirmReturn(a.id)}>
               Verify Return
             </Button>
           )}
@@ -224,7 +215,9 @@ function AssetRequestsPage() {
           >
             <option value="all">All statuses</option>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>{ASSET_STATUS_LABELS[s]}</option>
+              <option key={s} value={s}>
+                {ASSET_STATUS_LABELS[s]}
+              </option>
             ))}
           </select>
           <select
@@ -234,7 +227,9 @@ function AssetRequestsPage() {
           >
             <option value="all">All types</option>
             {ASSET_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
         </div>
@@ -246,9 +241,7 @@ function AssetRequestsPage() {
         empty={
           <EmptyState
             icon={<Boxes className="h-6 w-6" />}
-            title={
-              isSupport ? "No requests match your filters." : "No asset requests yet."
-            }
+            title={isSupport ? "No requests match your filters." : "No asset requests yet."}
             description={
               isSupport
                 ? "Try clearing the filters to see every asset request."
@@ -256,7 +249,10 @@ function AssetRequestsPage() {
             }
             action={
               isSupport ? undefined : (
-                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setRequestOpen(true)}>
+                <Button
+                  leftIcon={<Plus className="h-4 w-4" />}
+                  onClick={() => setRequestOpen(true)}
+                >
                   Request Asset
                 </Button>
               )

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   Boxes,
   CalendarDays,
   DoorOpen,
   KeyRound,
+  LogOut,
   Pencil,
   TicketCheck,
 } from "lucide-react";
@@ -13,13 +14,12 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
 import { Button } from "@/components/ui-kit/Button";
 import { StatusBadge } from "@/components/ui-kit/StatusBadge";
-import {
-  EditProfileModal,
-  type ProfileDraft,
-} from "@/components/profile/EditProfileModal";
+import { EditProfileModal, type ProfileDraft } from "@/components/profile/EditProfileModal";
 import { ChangePasswordModal } from "@/components/profile/ChangePasswordModal";
 import { useRole } from "@/context/RoleContext";
 import { useNotifications } from "@/context/NotificationsContext";
+import { useAuth } from "@/context/AuthContext";
+import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { ACTIVITY_SUMMARY, BACKEND_PENDING_NOTE, PROFILES, type UserProfile } from "@/data/profile";
 
 export const Route = createFileRoute("/_app/profile")({
@@ -41,15 +41,7 @@ export const Route = createFileRoute("/_app/profile")({
   component: ProfilePage,
 });
 
-function Field({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-}) {
+function Field({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div>
       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -95,6 +87,8 @@ function ActivityCard({
 
 function ProfilePage() {
   const { role } = useRole();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { unreadCount } = useNotifications();
   const [overrides, setOverrides] = useState<Partial<Record<string, ProfileDraft>>>({});
   const [editOpen, setEditOpen] = useState(false);
@@ -102,8 +96,24 @@ function ProfilePage() {
   const [phoneDraft, setPhoneDraft] = useState<string | null>(null);
 
   const base = PROFILES[role];
-  const profile: UserProfile = { ...base, ...(overrides[role] ?? {}) };
+  const profile: UserProfile = {
+    ...base,
+    fullName: user?.fullName || base.fullName,
+    companyEmail: user?.companyEmail || base.companyEmail,
+    employeeId: user?.employeeId || base.employeeId,
+    department: user?.department || base.department,
+    designation: user?.designation || base.designation,
+    phone: user?.phone || base.phone,
+    username: user?.username || base.username,
+    initials: user?.initials || base.initials,
+    ...(overrides[role] ?? {}),
+  };
   const summary = ACTIVITY_SUMMARY[role];
+
+  const handleSignOut = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
 
   const saveProfile = (draft: ProfileDraft) => {
     setOverrides((prev) => ({ ...prev, [role]: { ...prev[role], ...draft } }));
@@ -124,13 +134,17 @@ function ProfilePage() {
     <div>
       <PageHeader
         title="My Profile"
-        description="Your personal information, account details and workspace preferences."
+        description="Your personal information, account details, role management, and workplace preferences."
         actions={
           <Button leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
             Edit Profile
           </Button>
         }
       />
+
+      <div className="mb-6">
+        <RoleSwitcher />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <DashboardCard className="lg:col-span-1">
@@ -217,18 +231,27 @@ function ProfilePage() {
           </div>
         </DashboardCard>
 
-        <DashboardCard title="Security" className="lg:col-span-1">
+        <DashboardCard title="Security & Session" className="lg:col-span-1">
           <p className="text-sm text-muted-foreground">
-            Update the password you use to sign in to FlowDesk.
+            Manage your password or end your active session.
           </p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            leftIcon={<KeyRound className="h-4 w-4" />}
-            onClick={() => setPasswordOpen(true)}
-          >
-            Change Password
-          </Button>
+          <div className="mt-4 flex flex-col gap-2">
+            <Button
+              variant="outline"
+              leftIcon={<KeyRound className="h-4 w-4" />}
+              onClick={() => setPasswordOpen(true)}
+            >
+              Change Password
+            </Button>
+            <Button
+              variant="outline"
+              className="text-red-600 hover:text-red-700 border-red-200 dark:border-red-900/50 hover:bg-red-500/10"
+              leftIcon={<LogOut className="h-4 w-4" />}
+              onClick={handleSignOut}
+            >
+              Sign out of FlowDesk
+            </Button>
+          </div>
         </DashboardCard>
 
         <DashboardCard title="Preferences" className="lg:col-span-3">

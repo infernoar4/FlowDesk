@@ -7,6 +7,7 @@ import {
   Boxes,
   Megaphone,
   DoorOpen,
+  ShieldCheck,
   UserCircle,
 } from "lucide-react";
 import { useRole } from "@/context/RoleContext";
@@ -20,6 +21,7 @@ type NavItem = {
     | "/assets"
     | "/announcements"
     | "/meeting-rooms"
+    | "/audit-logs"
     | "/profile";
   label: string;
   icon: typeof LayoutDashboard;
@@ -35,6 +37,7 @@ const nav: NavItem[] = [
   { to: "/assets", label: "Assets", icon: Boxes },
   { to: "/announcements", label: "Announcements", icon: Megaphone },
   { to: "/meeting-rooms", label: "Meeting Rooms", icon: DoorOpen },
+  { to: "/audit-logs", label: "Audit Logs", icon: ShieldCheck },
   { to: "/profile", label: "Profile", icon: UserCircle },
 ];
 
@@ -46,11 +49,17 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-sidebar-border">
-        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-          F
+      <div className="h-16 flex items-center gap-3 px-5 border-b border-sidebar-border">
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 p-[1.5px] shadow-md shadow-indigo-500/20 flex items-center justify-center shrink-0">
+          <div className="h-full w-full rounded-[10px] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-extrabold text-sm tracking-tight">
+              FD
+            </span>
+          </div>
         </div>
-        <span className="text-lg font-semibold tracking-tight text-white">FlowDesk</span>
+        <span className="text-lg font-bold tracking-tight text-white flex items-center gap-0.5">
+          Flow<span className="text-cyan-400 font-semibold">Desk</span>
+        </span>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">

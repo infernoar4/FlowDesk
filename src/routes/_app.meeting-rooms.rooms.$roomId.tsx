@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, MapPin, Users, Wrench, Pencil } from "lucide-react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { ArrowLeft, MapPin, Users, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui-kit/Button";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
@@ -9,75 +9,83 @@ import { BookingStatusBadge } from "@/components/meeting-rooms/BookingStatusBadg
 import { BookingModal } from "@/components/meeting-rooms/BookingModal";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
 import { useRole } from "@/context/RoleContext";
-import {
-  computeRoomStatus,
-  formatDate,
-  formatTimeRange,
-  roomBookings,
-  rooms,
-  TODAY_ISO,
-  type Room,
-} from "@/data/rooms";
+import { useRooms } from "@/context/RoomContext";
+import { computeRoomStatus, formatDate, formatTimeRange, TODAY_ISO } from "@/data/rooms";
 
 export const Route = createFileRoute("/_app/meeting-rooms/rooms/$roomId")({
-  head: () => ({ meta: [{ title: "Room Details — FlowDesk" }] }),
-  loader: ({ params }): Room => {
-    const room = rooms.find((r) => r.id === params.roomId);
-    if (!room) throw notFound();
-    return room;
-  },
-  notFoundComponent: RoomNotFound,
+  head: ({ params }) => ({ meta: [{ title: `${params.roomId} — FlowDesk` }] }),
   component: RoomDetailsPage,
 });
 
-function RoomNotFound() {
+function BackLink() {
   return (
-    <div>
-      <PageHeader title="Room not found" description="This room may have been removed." />
-      <Link to="/meeting-rooms/rooms" className="text-sm font-medium text-primary hover:underline">
-        ← Back to Rooms
-      </Link>
-    </div>
+    <Link
+      to="/meeting-rooms/rooms"
+      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" /> Back to Rooms
+    </Link>
   );
 }
 
 function RoomDetailsPage() {
-  const room = Route.useLoaderData();
+  const { roomId } = useParams({ from: "/_app/meeting-rooms/rooms/$roomId" });
+  const { getRoomById, bookings } = useRooms();
   const { role } = useRole();
-  const view = role;
-  const isSupport = view === "support";
+  const isSupport = role === "support";
+
+  const room = getRoomById(roomId);
   const [bookOpen, setBookOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
+  const roomBookings = useMemo(
+    () => bookings.filter((b) => b.roomId === roomId),
+    [bookings, roomId],
+  );
+
   const upcoming = useMemo(
     () =>
-      roomBookings(room.id)
-        .filter((b) => b.date >= TODAY_ISO)
+      roomBookings
+        .filter((b) => b.date >= TODAY_ISO && b.status !== "cancelled")
         .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime)),
-    [room.id],
+    [roomBookings],
   );
   const today = upcoming.filter((b) => b.date === TODAY_ISO);
+
+  if (!room) {
+    return (
+      <div>
+        <BackLink />
+        <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center">
+          <h2 className="text-base font-semibold text-foreground">Room not found</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Meeting room <code className="font-mono text-xs">{roomId}</code> doesn't exist or was
+            removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const effectiveStatus = computeRoomStatus(room);
   const disabled = effectiveStatus === "maintenance";
-
 
   return (
     <div>
       <div className="mb-4">
-        <Link
-          to="/meeting-rooms/rooms"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Rooms
-        </Link>
+        <BackLink />
       </div>
 
       <PageHeader
         title={room.name}
-        description={room.description}
+        description={`Meeting room located on ${room.floor} (${room.location})`}
         actions={
           isSupport ? (
-            <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => setEditOpen(true)}>
+            <Button
+              variant="outline"
+              leftIcon={<Pencil className="h-4 w-4" />}
+              onClick={() => setEditOpen(true)}
+            >
               Edit Room
             </Button>
           ) : (
@@ -90,55 +98,52 @@ function RoomDetailsPage() {
 
       <div className="mb-6 flex items-center gap-2">
         <RoomStatusBadge status={effectiveStatus} />
-        <span className="text-xs text-muted-foreground">Room ID · {room.id}</span>
+        <span className="text-xs text-muted-foreground font-mono">Room ID · {room.id}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <DashboardCard title="Room Information">
+          <DashboardCard title="Room Specs & Amenities">
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <dt className="text-xs text-muted-foreground">Capacity</dt>
-                <dd className="mt-1 flex items-center gap-1.5 text-foreground">
-                  <Users className="h-4 w-4 text-muted-foreground" /> Seats {room.capacity}
+                <dt className="text-xs text-muted-foreground uppercase tracking-wide">Capacity</dt>
+                <dd className="mt-1 flex items-center gap-1.5 text-foreground font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" /> Seats {room.capacity} people
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Floor / Location</dt>
-                <dd className="mt-1 flex items-center gap-1.5 text-foreground">
-                  <MapPin className="h-4 w-4 text-muted-foreground" /> {room.floor}
+                <dt className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Floor & Location
+                </dt>
+                <dd className="mt-1 flex items-center gap-1.5 text-foreground font-medium">
+                  <MapPin className="h-4 w-4 text-muted-foreground" /> {room.floor} ·{" "}
+                  {room.location}
                 </dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">Equipment</dt>
+                <dt className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Equipment & Amenities
+                </dt>
                 <dd className="mt-2 flex flex-wrap gap-1.5">
-                  {room.equipment.map((e: string) => (
+                  {(room.amenities ?? room.equipment ?? []).map((e: string) => (
                     <span
                       key={e}
-                      className="inline-flex items-center rounded-md bg-primary-soft text-primary px-2 py-0.5 text-xs font-medium"
+                      className="inline-flex items-center rounded-md bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium"
                     >
                       {e}
                     </span>
                   ))}
                 </dd>
               </div>
-              <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">About</dt>
-                <dd className="mt-1 text-sm text-foreground">{room.description}</dd>
-              </div>
             </dl>
           </DashboardCard>
 
           <DashboardCard
-            title={isSupport ? "Today's Schedule" : "Today's / Upcoming Bookings"}
-            description={
-              isSupport
-                ? "Bookings scheduled for today in this room."
-                : "Preview of upcoming bookings in this room."
-            }
+            title={isSupport ? "Today's Room Schedule" : "Upcoming Schedule"}
+            description="Booked time slots for this room"
           >
             {(isSupport ? today : upcoming.slice(0, 6)).length === 0 ? (
-              <p className="text-sm text-muted-foreground">No bookings to show.</p>
+              <p className="text-sm text-muted-foreground">No bookings scheduled for this room.</p>
             ) : (
               <ul className="divide-y divide-border -mx-5">
                 {(isSupport ? today : upcoming.slice(0, 6)).map((b) => (
@@ -152,7 +157,8 @@ function RoomDetailsPage() {
                         {b.title}
                       </Link>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        {b.employee} · {formatDate(b.date)} · {formatTimeRange(b.startTime, b.endTime)}
+                        {b.organizer} · {formatDate(b.date)} ·{" "}
+                        {formatTimeRange(b.startTime, b.endTime)}
                       </div>
                     </div>
                     <BookingStatusBadge status={b.status} />
@@ -161,47 +167,20 @@ function RoomDetailsPage() {
               </ul>
             )}
           </DashboardCard>
-
-          {isSupport && (
-            <DashboardCard title="Maintenance History">
-              {room.maintenanceLog && room.maintenanceLog.length > 0 ? (
-                <ul className="space-y-3">
-                  {room.maintenanceLog.map((m: any, i: number) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary-soft text-primary flex items-center justify-center shrink-0">
-                        <Wrench className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-foreground">{m.action}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {m.date} · {m.by}
-                        </div>
-                        {m.note && (
-                          <div className="text-xs text-muted-foreground mt-1">{m.note}</div>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">No maintenance events recorded.</p>
-              )}
-            </DashboardCard>
-          )}
         </div>
 
         <aside className="space-y-6">
-          <DashboardCard title="Current Status">
+          <DashboardCard title="Availability Status">
             <div className="flex items-center justify-between">
               <RoomStatusBadge status={effectiveStatus} />
-              <span className="text-xs text-muted-foreground">{room.id}</span>
+              <span className="text-xs font-mono text-muted-foreground">{room.id}</span>
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
               {effectiveStatus === "maintenance"
-                ? "This room is temporarily unavailable for bookings."
+                ? "This room is offline for maintenance."
                 : effectiveStatus === "occupied"
-                ? "This room is currently in use."
-                : "This room can be booked right now."}
+                  ? "This room is currently occupied."
+                  : "This room is available for instant reservation."}
             </p>
           </DashboardCard>
         </aside>

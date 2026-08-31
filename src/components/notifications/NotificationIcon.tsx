@@ -1,13 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  Boxes,
-  CalendarDays,
-  Megaphone,
-  Settings2,
-  TicketCheck,
-  DoorOpen,
-} from "lucide-react";
+import { Boxes, CalendarDays, Megaphone, Settings2, TicketCheck, DoorOpen } from "lucide-react";
 import type { Notification, NotificationType } from "@/data/notifications";
 
 const icons: Record<NotificationType, typeof TicketCheck> = {
@@ -85,11 +78,7 @@ export function NotificationLink({
       );
     if (type === "meetings")
       return (
-        <Link
-          to="/meeting-rooms/bookings/$bookingId"
-          params={{ bookingId: refId }}
-          {...props}
-        >
+        <Link to="/meeting-rooms/bookings/$bookingId" params={{ bookingId: refId }} {...props}>
           {children}
         </Link>
       );

@@ -1,22 +1,27 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, Paperclip, Tag, User } from "lucide-react";
+import { useState } from "react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  Paperclip,
+  RotateCcw,
+  Send,
+  Tag,
+  User,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
 import { StatusBadge } from "@/components/ui-kit/StatusBadge";
 import { TicketTimeline } from "@/components/tickets/TicketTimeline";
 import { PriorityBadge } from "@/components/tickets/PriorityBadge";
 import { SupportPanel } from "@/components/tickets/SupportPanel";
-import { tickets, type Ticket } from "@/data/tickets";
 import { useRole } from "@/context/RoleContext";
+import { useTickets } from "@/context/TicketContext";
+import { Button } from "@/components/ui-kit/Button";
 
 export const Route = createFileRoute("/_app/tickets/$ticketId")({
   head: ({ params }) => ({ meta: [{ title: `${params.ticketId} — FlowDesk` }] }),
-  loader: ({ params }): { ticket: Ticket } => {
-    const ticket = tickets.find((t) => t.id === params.ticketId);
-    if (!ticket) throw notFound();
-    return { ticket };
-  },
-  notFoundComponent: TicketNotFound,
   component: TicketDetailPage,
 });
 
@@ -25,8 +30,10 @@ function TicketNotFound() {
     <div>
       <BackLink />
       <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center">
-        <h2 className="text-base font-semibold">Ticket not found</h2>
-        <p className="mt-1 text-sm text-muted-foreground">The ticket you're looking for doesn't exist.</p>
+        <h2 className="text-base font-semibold text-foreground">Ticket not found</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The ticket you're looking for doesn't exist or was removed.
+        </p>
       </div>
     </div>
   );
@@ -34,20 +41,56 @@ function TicketNotFound() {
 
 function BackLink() {
   return (
-    <Link to="/tickets" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+    <Link
+      to="/tickets"
+      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+    >
       <ArrowLeft className="h-4 w-4" /> Back to tickets
     </Link>
   );
 }
 
 function TicketDetailPage() {
-  const { ticket } = Route.useLoaderData() as { ticket: Ticket };
+  const { ticketId } = useParams({ from: "/_app/tickets/$ticketId" });
+  const { getTicketById, addComment, updateTicketStatus } = useTickets();
   const { role } = useRole();
+  const [newComment, setNewComment] = useState("");
+  const [reopenReason, setReopenReason] = useState("");
+  const [showReopenInput, setShowReopenInput] = useState(false);
+
+  const ticket = getTicketById(ticketId);
   const isSupport = role === "support";
+
+  if (!ticket) {
+    return <TicketNotFound />;
+  }
+
+  const handleSendComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    addComment(ticket.id, newComment);
+    setNewComment("");
+  };
+
+  const handleConfirmClose = () => {
+    updateTicketStatus(ticket.id, "closed");
+    addComment(ticket.id, "Employee confirmed resolution. Ticket closed.");
+  };
+
+  const handleReopenTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    const reasonText = reopenReason.trim() || "Issue persists after resolution attempt.";
+    updateTicketStatus(ticket.id, "in_progress");
+    addComment(ticket.id, `Ticket reopened by employee: ${reasonText}`);
+    setShowReopenInput(false);
+    setReopenReason("");
+  };
 
   return (
     <div>
-      <div className="mb-4"><BackLink /></div>
+      <div className="mb-4">
+        <BackLink />
+      </div>
       <PageHeader
         title={ticket.title}
         description={`Ticket ${ticket.id}`}
@@ -77,7 +120,9 @@ function TicketDetailPage() {
               {ticket.description}
             </p>
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Attachment</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                Attachment
+              </div>
               <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
                 <Paperclip className="h-4 w-4" />
                 {ticket.attachment ?? "No attachment"}
@@ -89,7 +134,10 @@ function TicketDetailPage() {
             <TicketTimeline current={ticket.status} />
           </DashboardCard>
 
-          <DashboardCard title="Conversation" description="Updates between the employee and the support team">
+          <DashboardCard
+            title="Conversation"
+            description="Updates between the employee and the support team"
+          >
             <ul className="space-y-4">
               {ticket.comments.map((c, i) => {
                 const isSupportMsg = c.role === "Support";
@@ -97,7 +145,9 @@ function TicketDetailPage() {
                   <li key={i} className={`flex gap-3 ${isSupportMsg ? "" : "flex-row-reverse"}`}>
                     <div
                       className={`h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-                        isSupportMsg ? "bg-primary-soft text-primary" : "bg-accent text-accent-foreground"
+                        isSupportMsg
+                          ? "bg-primary/10 text-primary"
+                          : "bg-accent text-accent-foreground"
                       }`}
                     >
                       {isSupportMsg ? "S" : "E"}
@@ -120,17 +170,23 @@ function TicketDetailPage() {
                 );
               })}
             </ul>
-            <div className="mt-4 pt-4 border-t border-border">
+            <form
+              onSubmit={handleSendComment}
+              className="mt-4 pt-4 border-t border-border flex flex-col gap-2"
+            >
               <textarea
                 rows={2}
-                placeholder={
-                  isSupport
-                    ? "Reply to the employee…"
-                    : "Reply to the support team…"
-                }
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={isSupport ? "Reply to the employee…" : "Reply to the support team…"}
                 className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring resize-none"
               />
-            </div>
+              <div className="flex justify-end">
+                <Button size="sm" type="submit" leftIcon={<Send className="h-3.5 w-3.5" />}>
+                  Post Reply
+                </Button>
+              </div>
+            </form>
           </DashboardCard>
         </div>
 
@@ -151,13 +207,17 @@ function TicketDetailPage() {
               </div>
               <div className="flex justify-between gap-3 items-center">
                 <dt className="text-muted-foreground">Status</dt>
-                <dd><StatusBadge status={ticket.status} /></dd>
+                <dd>
+                  <StatusBadge status={ticket.status} />
+                </dd>
               </div>
               {isSupport && (
                 <>
                   <div className="flex justify-between gap-3 items-center">
-                    <dt className="text-muted-foreground">Priority</dt>
-                    <dd><PriorityBadge priority={ticket.priority} /></dd>
+                    <dt className="text-muted-foreground">Priority Triage</dt>
+                    <dd>
+                      <PriorityBadge priority={ticket.priority} />
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Assignee</dt>
@@ -174,10 +234,76 @@ function TicketDetailPage() {
 
           {isSupport ? (
             <SupportPanel ticket={ticket} />
+          ) : ticket.status === "resolved" ? (
+            <DashboardCard
+              title="Resolution Verification"
+              description="Please verify if your workplace issue is fixed."
+              action={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+            >
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  The support engineer marked this ticket as resolved. Does everything work properly
+                  now?
+                </p>
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={handleConfirmClose}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-1.5" /> Confirm Resolution & Close
+                </Button>
+
+                {!showReopenInput ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowReopenInput(true)}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1.5 text-amber-500" /> Issue Not Fixed — Reopen
+                    Ticket
+                  </Button>
+                ) : (
+                  <form
+                    onSubmit={handleReopenTicket}
+                    className="space-y-2 pt-2 border-t border-border"
+                  >
+                    <label className="text-xs font-medium text-foreground block">
+                      Why does the issue persist?
+                    </label>
+                    <textarea
+                      required
+                      value={reopenReason}
+                      onChange={(e) => setReopenReason(e.target.value)}
+                      rows={2}
+                      placeholder="Explain what is still not working…"
+                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-xs focus:outline-none focus:border-ring resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-1/2"
+                        onClick={() => setShowReopenInput(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        className="w-1/2 bg-amber-500 hover:bg-amber-600 text-white"
+                      >
+                        Submit Reopen
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </DashboardCard>
           ) : (
             <DashboardCard title="Need help?">
               <p className="text-sm text-muted-foreground">
-                The support team will respond within 1 business day. You'll be notified here when the status changes.
+                The IT support team will review and triage your ticket. You will receive updates in
+                the conversation tab.
               </p>
             </DashboardCard>
           )}

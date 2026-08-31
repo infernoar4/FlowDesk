@@ -14,19 +14,19 @@ export function LeaveTimeline({ status }: LeaveTimelineProps) {
     status === "approved"
       ? "Approved"
       : status === "rejected"
-      ? "Rejected"
-      : status === "cancelled"
-      ? "Cancelled"
-      : "Decision Pending";
+        ? "Rejected"
+        : status === "cancelled"
+          ? "Cancelled"
+          : "Decision Pending";
 
   const finalClass =
     status === "approved"
       ? "bg-success text-success-foreground"
       : status === "rejected"
-      ? "bg-destructive text-destructive-foreground"
-      : status === "cancelled"
-      ? "bg-muted text-muted-foreground"
-      : "bg-muted text-muted-foreground";
+        ? "bg-destructive text-destructive-foreground"
+        : status === "cancelled"
+          ? "bg-muted text-muted-foreground"
+          : "bg-muted text-muted-foreground";
 
   const stages = [
     {
@@ -43,7 +43,11 @@ export function LeaveTimeline({ status }: LeaveTimelineProps) {
       dot: decided
         ? "bg-primary text-primary-foreground"
         : "bg-primary text-primary-foreground ring-4 ring-primary/15",
-      icon: decided ? <Check className="h-4 w-4" /> : <span className="text-xs font-semibold">2</span>,
+      icon: decided ? (
+        <Check className="h-4 w-4" />
+      ) : (
+        <span className="text-xs font-semibold">2</span>
+      ),
     },
     {
       key: "final",
@@ -80,7 +84,9 @@ export function LeaveTimeline({ status }: LeaveTimelineProps) {
               )}
             </div>
             <div className="sm:text-center">
-              <div className={`text-sm font-medium ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
+              <div
+                className={`text-sm font-medium ${s.done ? "text-foreground" : "text-muted-foreground"}`}
+              >
                 {s.label}
               </div>
               {i === 1 && !decided && (

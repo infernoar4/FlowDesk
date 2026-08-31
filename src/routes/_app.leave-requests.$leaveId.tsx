@@ -1,14 +1,6 @@
 import { useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  MessageSquare,
-  Tag,
-  User,
-  XCircle,
-} from "lucide-react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { ArrowLeft, Calendar, CheckCircle2, MessageSquare, Tag, User, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardCard } from "@/components/ui-kit/DashboardCard";
 import { StatusBadge } from "@/components/ui-kit/StatusBadge";
@@ -17,16 +9,10 @@ import { LeaveTimeline } from "@/components/leaves/LeaveTimeline";
 import { LeaveFormModal } from "@/components/leaves/LeaveFormModal";
 import { ManagerReviewModal } from "@/components/leaves/ManagerReviewModal";
 import { useLeaveView } from "@/context/LeaveViewContext";
-import { leaves, type LeaveRequest } from "@/data/leaves";
+import { useLeaves } from "@/context/LeaveContext";
 
 export const Route = createFileRoute("/_app/leave-requests/$leaveId")({
   head: ({ params }) => ({ meta: [{ title: `${params.leaveId} — FlowDesk` }] }),
-  loader: ({ params }): { leave: LeaveRequest } => {
-    const leave = leaves.find((l) => l.id === params.leaveId);
-    if (!leave) throw notFound();
-    return { leave };
-  },
-  notFoundComponent: LeaveNotFound,
   component: LeaveDetailPage,
 });
 
@@ -41,37 +27,39 @@ function BackLink() {
   );
 }
 
-function LeaveNotFound() {
-  return (
-    <div>
-      <BackLink />
-      <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center">
-        <h2 className="text-base font-semibold">Leave request not found</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The leave request you're looking for doesn't exist.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function LeaveDetailPage() {
-  const { leave } = Route.useLoaderData() as { leave: LeaveRequest };
+  const { leaveId } = useParams({ from: "/_app/leave-requests/$leaveId" });
+  const { getLeaveById, cancelLeave } = useLeaves();
   const { view } = useLeaveView();
+
+  const leave = getLeaveById(leaveId);
   const isManager = view === "manager";
 
   const [editOpen, setEditOpen] = useState(false);
   const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null);
 
-  const cancelable =
-    leave.status === "pending" ||
-    (leave.status === "approved" &&
-      !Number.isNaN(new Date(leave.startDate).getTime()) &&
-      new Date(leave.startDate).getTime() > Date.now());
+  if (!leave) {
+    return (
+      <div>
+        <BackLink />
+        <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center">
+          <h2 className="text-base font-semibold text-foreground">Leave request not found</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The leave request <code className="font-mono text-xs">{leaveId}</code> doesn't exist or
+            was removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const cancelable = leave.status === "pending";
 
   return (
     <div>
-      <div className="mb-4"><BackLink /></div>
+      <div className="mb-4">
+        <BackLink />
+      </div>
       <PageHeader
         title={`${leave.type} · ${leave.days} day${leave.days === 1 ? "" : "s"}`}
         description={`Request ${leave.id}`}
@@ -154,11 +142,15 @@ function LeaveDetailPage() {
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">Duration</dt>
-                <dd>{leave.days} day{leave.days === 1 ? "" : "s"}</dd>
+                <dd>
+                  {leave.days} day{leave.days === 1 ? "" : "s"}
+                </dd>
               </div>
               <div className="flex justify-between gap-3 items-center">
                 <dt className="text-muted-foreground">Status</dt>
-                <dd><StatusBadge status={leave.status} /></dd>
+                <dd>
+                  <StatusBadge status={leave.status} />
+                </dd>
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">Applied On</dt>
@@ -169,8 +161,8 @@ function LeaveDetailPage() {
 
           {leave.status === "approved" && leave.reviewedBy && (
             <DashboardCard
-              title="Approval"
-              action={<CheckCircle2 className="h-4 w-4 text-success" />}
+              title="Approval Details"
+              action={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
             >
               <dl className="text-sm space-y-2">
                 <div className="flex justify-between gap-3">
@@ -189,7 +181,7 @@ function LeaveDetailPage() {
 
           {leave.status === "rejected" && leave.reviewedBy && (
             <DashboardCard
-              title="Rejection"
+              title="Rejection Details"
               action={<XCircle className="h-4 w-4 text-destructive" />}
             >
               <dl className="text-sm space-y-2">
@@ -210,9 +202,9 @@ function LeaveDetailPage() {
           {isManager && leave.status === "pending" ? (
             <DashboardCard title="Manager Actions" description="Review this request">
               <div className="flex flex-col gap-2">
-                <Button onClick={() => setReviewAction("approve")}>Approve</Button>
+                <Button onClick={() => setReviewAction("approve")}>Approve Request</Button>
                 <Button variant="outline" onClick={() => setReviewAction("reject")}>
-                  Reject
+                  Reject Request
                 </Button>
               </div>
             </DashboardCard>
@@ -223,22 +215,14 @@ function LeaveDetailPage() {
                   <Button variant="outline" onClick={() => setEditOpen(true)}>
                     Edit Request
                   </Button>
-                  <Button variant="destructive">Cancel Request</Button>
+                  <Button variant="destructive" onClick={() => cancelLeave(leave.id)}>
+                    Cancel Request
+                  </Button>
                 </div>
               )}
-              {leave.status === "approved" && cancelable && (
-                <div className="flex flex-col gap-2">
-                  <Button variant="destructive">Cancel Request</Button>
-                  <p className="text-xs text-muted-foreground">
-                    Approved requests can only be cancelled before the start date.
-                  </p>
-                </div>
-              )}
-              {(leave.status === "rejected" ||
-                leave.status === "cancelled" ||
-                (leave.status === "approved" && !cancelable)) && (
+              {leave.status !== "pending" && (
                 <p className="text-sm text-muted-foreground">
-                  No actions are available for this request.
+                  This request is {leave.status} and cannot be modified.
                 </p>
               )}
             </DashboardCard>
@@ -246,11 +230,7 @@ function LeaveDetailPage() {
         </div>
       </div>
 
-      <LeaveFormModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        initial={leave}
-      />
+      <LeaveFormModal open={editOpen} onClose={() => setEditOpen(false)} initial={leave} />
       <ManagerReviewModal
         open={reviewAction !== null}
         action={reviewAction}

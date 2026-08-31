@@ -32,9 +32,7 @@ export function Modal({
         <header className="sticky top-0 bg-card flex items-start justify-between gap-4 px-5 py-4 border-b border-border">
           <div>
             <h2 className="text-base font-semibold text-foreground">{title}</h2>
-            {description && (
-              <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-            )}
+            {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
           </div>
           <button
             type="button"

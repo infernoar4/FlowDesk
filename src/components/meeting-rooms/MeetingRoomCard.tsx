@@ -44,7 +44,9 @@ export function MeetingRoomCard({ room, supportActions }: Props) {
       <div className="pt-2 border-t border-border flex items-center justify-end gap-2">
         {supportActions ?? (
           <Link to="/meeting-rooms/rooms/$roomId" params={{ roomId: room.id }}>
-            <Button variant="outline" size="sm">View Details</Button>
+            <Button variant="outline" size="sm">
+              View Details
+            </Button>
           </Link>
         )}
       </div>

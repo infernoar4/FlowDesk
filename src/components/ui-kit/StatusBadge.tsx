@@ -1,4 +1,17 @@
-type Status = "open" | "assigned" | "in_progress" | "resolved" | "closed" | "pending" | "approved" | "rejected" | "cancelled" | "active" | "inactive" | "return_requested" | "returned";
+type Status =
+  | "open"
+  | "assigned"
+  | "in_progress"
+  | "resolved"
+  | "closed"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "active"
+  | "inactive"
+  | "return_requested"
+  | "returned";
 
 const styles: Record<Status, string> = {
   open: "bg-info/10 text-info",
@@ -34,7 +47,9 @@ const labels: Record<Status, string> = {
 
 export function StatusBadge({ status }: { status: Status }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}
+    >
       <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
       {labels[status]}
     </span>

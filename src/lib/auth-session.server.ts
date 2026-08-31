@@ -78,11 +78,20 @@ function sessionCookieOptions() {
 
 function toAuthenticatedUser(row: UserRow): AuthenticatedUser {
   return {
-    id: row.id, employeeId: row.employeeId, fullName: row.fullName,
-    companyEmail: row.companyEmail, username: row.username, role: row.role,
-    accountStatus: "active", department: row.department, designation: row.designation,
-    phone: row.phone, location: row.location, photoUrl: row.photoUrl,
-    lastLogin: row.lastLogin, inAppNotifications: Boolean(row.in_app_notifications),
+    id: row.id,
+    employeeId: row.employeeId,
+    fullName: row.fullName,
+    companyEmail: row.companyEmail,
+    username: row.username,
+    role: row.role,
+    accountStatus: "active",
+    department: row.department,
+    designation: row.designation,
+    phone: row.phone,
+    location: row.location,
+    photoUrl: row.photoUrl,
+    lastLogin: row.lastLogin,
+    inAppNotifications: Boolean(row.in_app_notifications),
     emailNotifications: Boolean(row.email_notifications),
   };
 }
@@ -128,7 +137,10 @@ export const requireEmployee = () => requireRole("employee");
 export const requireSupportEngineer = () => requireRole("support");
 export const requireManager = () => requireRole("manager");
 
-export async function loginWithCredentials(data: { identifier: string; password: string }): Promise<AuthenticatedUser> {
+export async function loginWithCredentials(data: {
+  identifier: string;
+  password: string;
+}): Promise<AuthenticatedUser> {
   const identifier = data.identifier.trim().toLowerCase();
   if (!identifier || !data.password || data.password.length > 1024) {
     throw new Error("Invalid email, username, or password.");
@@ -142,7 +154,11 @@ export async function loginWithCredentials(data: { identifier: string; password:
       [identifier, identifier],
     );
     const row = (rows as (UserRow & { password_hash: string })[])[0];
-    if (!row || row.account_status !== "active" || !(await bcrypt.compare(data.password, row.password_hash))) {
+    if (
+      !row ||
+      row.account_status !== "active" ||
+      !(await bcrypt.compare(data.password, row.password_hash))
+    ) {
       throw new Error("Invalid email, username, or password.");
     }
     const token = randomBytes(32).toString("base64url");
@@ -166,7 +182,8 @@ export async function loginWithCredentials(data: { identifier: string; password:
     setCookie(SESSION_COOKIE_NAME, token, sessionCookieOptions());
     return toAuthenticatedUser({ ...row, lastLogin: new Date() });
   } catch (error) {
-    if (error instanceof Error && error.message === "Invalid email, username, or password.") throw error;
+    if (error instanceof Error && error.message === "Invalid email, username, or password.")
+      throw error;
     throw new Error("Unable to sign in. Please try again.");
   }
 }
@@ -174,7 +191,8 @@ export async function loginWithCredentials(data: { identifier: string; password:
 export async function logoutCurrentUser() {
   await ensureAuthenticationSchema();
   const token = getCookie(SESSION_COOKIE_NAME);
-  if (token) await db.query("DELETE FROM user_sessions WHERE token_hash = ?", [hashSessionToken(token)]);
+  if (token)
+    await db.query("DELETE FROM user_sessions WHERE token_hash = ?", [hashSessionToken(token)]);
   deleteCookie(SESSION_COOKIE_NAME, sessionCookieOptions());
   return { success: true };
 }

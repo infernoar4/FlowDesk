@@ -8,12 +8,12 @@ import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { MeetingRoomCard } from "@/components/meeting-rooms/MeetingRoomCard";
 import { EditRoomModal } from "@/components/meeting-rooms/EditRoomModal";
 import { useRole } from "@/context/RoleContext";
+import { useRooms } from "@/context/RoomContext";
 import {
   EQUIPMENT_OPTIONS,
   ROOM_STATUS_LABELS,
-  rooms as allRooms,
   type Equipment,
-  type Room,
+  type MeetingRoom,
   type RoomStatus,
 } from "@/data/rooms";
 
@@ -23,28 +23,33 @@ export const Route = createFileRoute("/_app/meeting-rooms/rooms/")({
 });
 
 function RoomsPage() {
+  const { rooms } = useRooms();
   const { role } = useRole();
-  const view = role;
-  const isSupport = view === "support";
+  const isSupport = role === "support";
 
   const [query, setQuery] = useState("");
   const [capacity, setCapacity] = useState<"all" | "small" | "medium" | "large">("all");
   const [status, setStatus] = useState<"all" | RoomStatus>("all");
   const [equipment, setEquipment] = useState<"all" | Equipment>("all");
 
-  const [editRoom, setEditRoom] = useState<Room | null>(null);
+  const [editRoom, setEditRoom] = useState<MeetingRoom | null>(null);
 
   const filtered = useMemo(() => {
-    return allRooms.filter((r) => {
-      if (query && !`${r.name} ${r.floor}`.toLowerCase().includes(query.toLowerCase())) return false;
+    return rooms.filter((r) => {
+      if (
+        query &&
+        !`${r.name} ${r.floor} ${r.location}`.toLowerCase().includes(query.toLowerCase())
+      )
+        return false;
       if (status !== "all" && r.status !== status) return false;
-      if (equipment !== "all" && !r.equipment.includes(equipment)) return false;
+      if (equipment !== "all" && !(r.amenities ?? r.equipment ?? []).includes(equipment))
+        return false;
       if (capacity === "small" && r.capacity > 6) return false;
       if (capacity === "medium" && (r.capacity < 7 || r.capacity > 12)) return false;
       if (capacity === "large" && r.capacity < 13) return false;
       return true;
     });
-  }, [query, capacity, status, equipment]);
+  }, [rooms, query, capacity, status, equipment]);
 
   return (
     <div>
@@ -52,8 +57,8 @@ function RoomsPage() {
         title={isSupport ? "Room Management" : "All Rooms"}
         description={
           isSupport
-            ? "Manage every meeting room, capacity and maintenance status."
-            : "Browse rooms available across offices."
+            ? "Manage meeting rooms, capacity limits and maintenance status."
+            : "Browse available rooms across corporate office floors."
         }
       />
 
@@ -82,7 +87,9 @@ function RoomsPage() {
           >
             <option value="all">All Statuses</option>
             {(Object.keys(ROOM_STATUS_LABELS) as RoomStatus[]).map((s) => (
-              <option key={s} value={s}>{ROOM_STATUS_LABELS[s]}</option>
+              <option key={s} value={s}>
+                {ROOM_STATUS_LABELS[s]}
+              </option>
             ))}
           </select>
         </div>

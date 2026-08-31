@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui-kit/Button";
 import type { AssetRequest } from "@/data/assets";
+import { useAssets } from "@/context/AssetContext";
 
 interface SupportReviewModalProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface SupportReviewModalProps {
 }
 
 export function SupportReviewModal({ open, action, request, onClose }: SupportReviewModalProps) {
+  const { approveAssetRequest, rejectAssetRequest } = useAssets();
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +26,13 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
       setError("A rejection reason is required.");
       return;
     }
-    // Placeholder: no backend wiring in this sprint.
+
+    if (isReject) {
+      rejectAssetRequest(request.id, comment);
+    } else {
+      approveAssetRequest(request.id, comment);
+    }
+
     setComment("");
     setError(null);
     onClose();
@@ -32,8 +40,8 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-foreground/40" onClick={onClose} />
-      <div className="relative bg-card w-full max-w-md rounded-xl border border-border shadow-elevated">
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card w-full max-w-md rounded-xl border border-border shadow-elevated overflow-hidden animate-in fade-in-50 zoom-in-95">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <h2 className="text-base font-semibold text-foreground">
@@ -56,7 +64,8 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="rounded-lg bg-muted/40 border border-border px-3 py-2 text-xs text-muted-foreground">
             <div>
-              <span className="font-medium text-foreground">Requested On:</span> {request.requestedOn}
+              <span className="font-medium text-foreground">Requested On:</span>{" "}
+              {request.requestedOn}
             </div>
             <div className="mt-1">
               <span className="font-medium text-foreground">Reason:</span> {request.reason}
@@ -64,7 +73,7 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
           </div>
 
           <div>
-            <label className="text-xs font-medium text-foreground">
+            <label className="text-xs font-medium text-foreground block mb-1">
               {isReject ? "Rejection Reason" : "Support Comment"}
               {isReject && <span className="text-destructive"> *</span>}
               {!isReject && <span className="text-muted-foreground font-normal"> (optional)</span>}
@@ -78,13 +87,14 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
                   ? "Explain why this request is being rejected."
                   : "Add a note for the employee (optional)."
               }
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring resize-none"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-ring resize-none"
             />
           </div>
 
           {!isReject && (
             <p className="text-xs text-muted-foreground">
-              Approving marks this request approved. You will assign a specific asset in a separate step.
+              Approving marks this request approved. You will assign a physical asset model in a
+              separate step.
             </p>
           )}
 
@@ -94,8 +104,10 @@ export function SupportReviewModal({ open, action, request, onClose }: SupportRe
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant={isReject ? "destructive" : "primary"}>
               {isReject ? "Confirm Rejection" : "Confirm Approval"}
             </Button>

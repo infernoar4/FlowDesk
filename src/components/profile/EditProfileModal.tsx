@@ -3,10 +3,7 @@ import { Modal } from "@/components/ui-kit/Modal";
 import { Button } from "@/components/ui-kit/Button";
 import type { UserProfile } from "@/data/profile";
 
-export type ProfileDraft = Pick<
-  UserProfile,
-  "phone" | "emergencyContact" | "address" | "photoUrl"
->;
+export type ProfileDraft = Pick<UserProfile, "phone" | "emergencyContact" | "address" | "photoUrl">;
 
 interface Props {
   open: boolean;
@@ -34,7 +31,6 @@ export function EditProfileModal({ open, profile, onClose, onSave }: Props) {
   const [phone, setPhone] = useState(profile.phone);
   const [emergencyContact, setEmergencyContact] = useState(profile.emergencyContact);
   const [address, setAddress] = useState(profile.address);
-  const [photoUrl, setPhotoUrl] = useState(profile.photoUrl ?? "");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,7 +38,6 @@ export function EditProfileModal({ open, profile, onClose, onSave }: Props) {
     setPhone(profile.phone);
     setEmergencyContact(profile.emergencyContact);
     setAddress(profile.address);
-    setPhotoUrl(profile.photoUrl ?? "");
     setError(null);
   }, [open, profile]);
 
@@ -54,7 +49,6 @@ export function EditProfileModal({ open, profile, onClose, onSave }: Props) {
       phone: phone.trim(),
       emergencyContact: emergencyContact.trim(),
       address: address.trim(),
-      photoUrl: photoUrl.trim() || undefined,
     });
   };
 
@@ -75,29 +69,15 @@ export function EditProfileModal({ open, profile, onClose, onSave }: Props) {
       }
     >
       <div className="space-y-5">
-        <div className="flex items-center gap-4">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={`${profile.fullName} profile photo`}
-              className="h-16 w-16 rounded-full object-cover border border-border"
-            />
-          ) : (
-            <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-semibold">
-              {profile.initials}
-            </div>
-          )}
-          <div className="flex-1">
-            <label className={labelClass} htmlFor="photoUrl">
-              Profile Photo URL
-            </label>
-            <input
-              id="photoUrl"
-              className={inputClass}
-              value={photoUrl}
-              placeholder="https://…"
-              onChange={(e) => setPhotoUrl(e.target.value)}
-            />
+        <div className="flex items-center gap-4 bg-muted/50 p-3.5 rounded-xl border border-border">
+          <div className="h-14 w-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-semibold shrink-0">
+            {profile.initials}
+          </div>
+          <div>
+            <h4 className="text-base font-semibold text-foreground">{profile.fullName}</h4>
+            <p className="text-xs text-muted-foreground">
+              {profile.designation} · {profile.department}
+            </p>
           </div>
         </div>
 

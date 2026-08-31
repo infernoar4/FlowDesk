@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppAnnouncementsRouteImport } from './routes/_app.announcements'
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 import { Route as AppAssignedTicketsRouteImport } from './routes/_app.assigned-tickets'
+import { Route as AppAuditLogsRouteImport } from './routes/_app.audit-logs'
 import { Route as AppLeaveRequestsRouteImport } from './routes/_app.leave-requests'
 import { Route as AppMeetingRoomsRouteImport } from './routes/_app.meeting-rooms'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
@@ -61,6 +62,11 @@ const AppAssetsRoute = AppAssetsRouteImport.update({
 const AppAssignedTicketsRoute = AppAssignedTicketsRouteImport.update({
   id: '/assigned-tickets',
   path: '/assigned-tickets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLeaveRequestsRoute = AppLeaveRequestsRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/announcements': typeof AppAnnouncementsRoute
   '/assets': typeof AppAssetsRouteWithChildren
   '/assigned-tickets': typeof AppAssignedTicketsRoute
+  '/audit-logs': typeof AppAuditLogsRoute
   '/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/announcements': typeof AppAnnouncementsRoute
   '/assigned-tickets': typeof AppAssignedTicketsRoute
+  '/audit-logs': typeof AppAuditLogsRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/': typeof AppIndexRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/_app/announcements': typeof AppAnnouncementsRoute
   '/_app/assets': typeof AppAssetsRouteWithChildren
   '/_app/assigned-tickets': typeof AppAssignedTicketsRoute
+  '/_app/audit-logs': typeof AppAuditLogsRoute
   '/_app/leave-requests': typeof AppLeaveRequestsRouteWithChildren
   '/_app/meeting-rooms': typeof AppMeetingRoomsRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/assets'
     | '/assigned-tickets'
+    | '/audit-logs'
     | '/leave-requests'
     | '/meeting-rooms'
     | '/notifications'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/announcements'
     | '/assigned-tickets'
+    | '/audit-logs'
     | '/notifications'
     | '/profile'
     | '/'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/_app/announcements'
     | '/_app/assets'
     | '/_app/assigned-tickets'
+    | '/_app/audit-logs'
     | '/_app/leave-requests'
     | '/_app/meeting-rooms'
     | '/_app/notifications'
@@ -353,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/assigned-tickets'
       fullPath: '/assigned-tickets'
       preLoaderRoute: typeof AppAssignedTicketsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/audit-logs': {
+      id: '/_app/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/audit-logs'
+      preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/leave-requests': {
@@ -553,6 +572,7 @@ interface AppRouteChildren {
   AppAnnouncementsRoute: typeof AppAnnouncementsRoute
   AppAssetsRoute: typeof AppAssetsRouteWithChildren
   AppAssignedTicketsRoute: typeof AppAssignedTicketsRoute
+  AppAuditLogsRoute: typeof AppAuditLogsRoute
   AppLeaveRequestsRoute: typeof AppLeaveRequestsRouteWithChildren
   AppMeetingRoomsRoute: typeof AppMeetingRoomsRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -565,6 +585,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAnnouncementsRoute: AppAnnouncementsRoute,
   AppAssetsRoute: AppAssetsRouteWithChildren,
   AppAssignedTicketsRoute: AppAssignedTicketsRoute,
+  AppAuditLogsRoute: AppAuditLogsRoute,
   AppLeaveRequestsRoute: AppLeaveRequestsRouteWithChildren,
   AppMeetingRoomsRoute: AppMeetingRoomsRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,

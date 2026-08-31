@@ -64,8 +64,7 @@ export function AnnouncementCard({ announcement: a, onOpen }: Props) {
         </span>
         {a.attachment && (
           <span className="inline-flex items-center gap-1.5">
-            <Paperclip className="h-3.5 w-3.5" />
-            1 attachment
+            <Paperclip className="h-3.5 w-3.5" />1 attachment
           </span>
         )}
       </div>

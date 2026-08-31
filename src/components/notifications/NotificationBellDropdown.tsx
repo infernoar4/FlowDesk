@@ -1,8 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  NotificationIcon,
-  NotificationLink,
-} from "@/components/notifications/NotificationIcon";
+import { NotificationIcon, NotificationLink } from "@/components/notifications/NotificationIcon";
 import { useNotifications } from "@/context/NotificationsContext";
 import { relativeTime } from "@/data/notifications";
 
@@ -61,9 +58,7 @@ export function NotificationBellDropdown({ onClose }: { onClose: () => void }) {
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                     {n.description}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {relativeTime(n.minutesAgo)}
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{relativeTime(n.minutesAgo)}</p>
                 </div>
               </NotificationLink>
             </li>
