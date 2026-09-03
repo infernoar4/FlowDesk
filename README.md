@@ -41,13 +41,14 @@ All seeded user accounts share the default password: **`password123`**
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Enterprise Technology Stack
 
-* **Frontend Framework**: React 18, TypeScript, Vite
+* **Backend Framework**: **Java 17**, **Spring Boot 3**, **Spring Web (REST APIs)**
+* **ORM & Database Layer**: **Hibernate (JPA ORM)**, **Spring Data JPA**, **MySQL 8.0**
+* **Core Java Engine**: **Java Collection Framework** (`List`, `Map`, `HashMap`, `Set`), **Java Streams API** (Workload Load-Balancer Engine)
+* **Build System**: Apache Maven (`pom.xml`)
+* **Frontend UI**: React 18, TypeScript, Tailwind CSS, Glassmorphism, Dark/Light Mode, Lucide React Icons
 * **Routing Engine**: TanStack Router (File-Based Routing)
-* **Styling & UI**: Vanilla Tailwind CSS, Glassmorphism, Dark/Light Mode, Lucide React Icons
-* **Database**: MySQL 8.0 / MySQL2 Connector (`flowdesk` database)
-* **Quality Assurance**: ESLint, TypeScript Strict Mode (`tsc --noEmit`)
 
 ---
 

@@ -20,6 +20,7 @@ import { useRole } from "@/context/RoleContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useAuth } from "@/context/AuthContext";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
+import { ConfirmSignOutModal } from "@/components/layout/ConfirmSignOutModal";
 import { ACTIVITY_SUMMARY, BACKEND_PENDING_NOTE, PROFILES, type UserProfile } from "@/data/profile";
 
 export const Route = createFileRoute("/_app/profile")({
@@ -93,6 +94,7 @@ function ProfilePage() {
   const [overrides, setOverrides] = useState<Partial<Record<string, ProfileDraft>>>({});
   const [editOpen, setEditOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [signOutModalOpen, setSignOutModalOpen] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState<string | null>(null);
 
   const base = PROFILES[role];
@@ -110,7 +112,11 @@ function ProfilePage() {
   };
   const summary = ACTIVITY_SUMMARY[role];
 
-  const handleSignOut = () => {
+  const handleSignOutClick = () => {
+    setSignOutModalOpen(true);
+  };
+
+  const handleConfirmSignOut = () => {
     logout();
     navigate({ to: "/login" });
   };
@@ -247,7 +253,7 @@ function ProfilePage() {
               variant="outline"
               className="text-red-600 hover:text-red-700 border-red-200 dark:border-red-900/50 hover:bg-red-500/10"
               leftIcon={<LogOut className="h-4 w-4" />}
-              onClick={handleSignOut}
+              onClick={handleSignOutClick}
             >
               Sign out of FlowDesk
             </Button>
@@ -336,6 +342,12 @@ function ProfilePage() {
         onSave={saveProfile}
       />
       <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
+      <ConfirmSignOutModal
+        open={signOutModalOpen}
+        onClose={() => setSignOutModalOpen(false)}
+        onConfirm={handleConfirmSignOut}
+        userName={profile.fullName}
+      />
     </div>
   );
 }

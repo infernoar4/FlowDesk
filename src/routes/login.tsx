@@ -71,21 +71,23 @@ function LoginPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-primary to-indigo-600 text-primary-foreground p-12">
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center font-bold">
-            F
+      <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-primary via-indigo-600 to-blue-700 text-primary-foreground p-12">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-300 via-blue-300 to-cyan-300 p-[1.5px] shadow-md flex items-center justify-center shrink-0">
+            <div className="h-full w-full rounded-[10px] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center">
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-extrabold text-sm tracking-tight">
+                FD
+              </span>
+            </div>
           </div>
-          <span className="text-lg font-semibold">FlowDesk</span>
+          <span className="text-xl font-bold tracking-tight text-white flex items-center gap-0.5">
+            Flow<span className="text-cyan-300 font-semibold">Desk</span>
+          </span>
         </div>
         <div>
           <h1 className="text-4xl font-semibold leading-tight max-w-md">
             One workspace for tickets, people and operations.
           </h1>
-          <p className="mt-4 text-white/80 max-w-md">
-            Tickets, leave, assets, announcements and meeting rooms — all in a single, calm
-            interface.
-          </p>
           <div className="mt-8 p-4 rounded-xl bg-white/10 backdrop-blur border border-white/15 text-sm space-y-2">
             <div className="flex items-center gap-2 font-medium">
               <KeyRound className="h-4 w-4" /> Quick Demo Credentials
@@ -102,17 +104,23 @@ function LoginPage() {
             </p>
           </div>
         </div>
-        <div className="text-sm text-white/70">© 2026 FlowDesk</div>
+        <div />
       </div>
 
       {/* Right form */}
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-              F
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 p-[1.5px] flex items-center justify-center shrink-0">
+              <div className="h-full w-full rounded-[10px] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-extrabold text-sm tracking-tight">
+                  FD
+                </span>
+              </div>
             </div>
-            <span className="text-lg font-semibold text-foreground">FlowDesk</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              Flow<span className="text-primary font-semibold">Desk</span>
+            </span>
           </div>
 
           <h2 className="text-2xl font-semibold text-foreground">Welcome back</h2>
@@ -227,10 +235,6 @@ function LoginPage() {
               Sign up here
             </button>
           </div>
-
-          <p className="mt-6 text-xs text-muted-foreground text-center">
-            By continuing, you agree to FlowDesk's Terms and Privacy Policy.
-          </p>
         </div>
       </div>
 
@@ -264,9 +268,9 @@ function SignUpModal({ open, onClose }: { open: boolean; onClose: () => void }) 
 
   const strength = getPasswordStrength(password);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = registerUser(
+    const success = await registerUser(
       {
         fullName,
         companyEmail: email,
@@ -289,12 +293,16 @@ function SignUpModal({ open, onClose }: { open: boolean; onClose: () => void }) 
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-card w-full max-w-md rounded-xl border border-border shadow-elevated overflow-hidden animate-in fade-in-50 zoom-in-95">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-              F
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 p-[1.5px] flex items-center justify-center shrink-0">
+              <div className="h-full w-full rounded-[7px] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-extrabold text-xs tracking-tight">
+                  FD
+                </span>
+              </div>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Create Employee Account</h2>
+              <h2 className="text-base font-semibold text-foreground">Create Workplace Account</h2>
               <p className="text-xs text-muted-foreground">Register your workplace profile.</p>
             </div>
           </div>
@@ -360,11 +368,11 @@ function SignUpModal({ open, onClose }: { open: boolean; onClose: () => void }) 
 
           <div>
             <label className="block text-xs font-medium text-foreground mb-1">Account Role</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setRole("employee")}
-                className={`p-2.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                className={`p-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                   role === "employee"
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-background text-muted-foreground hover:bg-accent"
@@ -375,13 +383,24 @@ function SignUpModal({ open, onClose }: { open: boolean; onClose: () => void }) 
               <button
                 type="button"
                 onClick={() => setRole("support")}
-                className={`p-2.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                className={`p-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                   role === "support"
                     ? "border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
                     : "border-border bg-background text-muted-foreground hover:bg-accent"
                 }`}
               >
                 <Shield className="h-3.5 w-3.5" /> IT Support
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("manager")}
+                className={`p-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+                  role === "manager"
+                    ? "border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "border-border bg-background text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                <UserCheck className="h-3.5 w-3.5 text-amber-500" /> Manager / HR
               </button>
             </div>
           </div>

@@ -424,7 +424,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, pass: string, rememberMe?: boolean) => boolean;
-  registerUser: (draft: RegisterDraft, rememberMe?: boolean) => boolean;
+  registerUser: (draft: RegisterDraft, rememberMe?: boolean) => Promise<boolean>;
   loginAsDemo: (role: Role) => void;
   logout: () => void;
 }
@@ -562,7 +562,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const registerUser = (draft: RegisterDraft, rememberMe: boolean = true): boolean => {
+  const registerUser = async (
+    draft: RegisterDraft,
+    rememberMe: boolean = true,
+  ): Promise<boolean> => {
     const cleanEmail = draft.companyEmail.trim().toLowerCase();
     const cleanUsername = cleanEmail.split("@")[0] || cleanEmail;
     const allUsers = { ...MOCK_USERS, ...registeredAccounts };
@@ -572,20 +575,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    // Insert user record directly into real MySQL database
-    createDatabaseUser({
-      data: {
-        fullName: draft.fullName,
-        companyEmail: draft.companyEmail,
-        username: cleanUsername,
-        password: draft.password,
-        role: draft.role,
-        department: draft.department,
-        designation: draft.designation,
-      },
-    }).catch((err) => {
-      console.warn("MySQL async insert notice:", err?.message);
-    });
+    try {
+      // Save user directly to Java Spring Boot REST API & MySQL Database
+      const res = await fetch("http://localhost:8081/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: draft.fullName,
+          companyEmail: cleanEmail,
+          username: cleanUsername,
+          password: draft.password,
+          role: draft.role,
+          department: draft.department,
+          designation: draft.designation,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.user) {
+        console.log("✅ New user saved to Java Spring Boot & MySQL DB:", data.user);
+      }
+    } catch (err: any) {
+      console.warn("Spring Boot register sync notice:", err?.message);
+    }
 
     const parts = draft.fullName.trim().split(" ");
     const initials =

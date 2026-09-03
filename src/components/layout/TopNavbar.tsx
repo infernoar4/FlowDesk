@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 
 import { HelpModal } from "@/components/layout/HelpModal";
+import { ConfirmSignOutModal } from "@/components/layout/ConfirmSignOutModal";
 
 export function TopNavbar() {
   const { role, setRole } = useRole();
@@ -19,6 +20,7 @@ export function TopNavbar() {
   const [bellOpen, setBellOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [signOutModalOpen, setSignOutModalOpen] = useState(false);
 
   const bellRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -38,9 +40,13 @@ export function TopNavbar() {
     return () => document.removeEventListener("mousedown", onDown);
   }, [bellOpen, userMenuOpen]);
 
-  const handleSignOut = () => {
-    logout();
+  const handleSignOutClick = () => {
     setUserMenuOpen(false);
+    setSignOutModalOpen(true);
+  };
+
+  const handleConfirmSignOut = () => {
+    logout();
     navigate({ to: "/login" });
   };
 
@@ -71,13 +77,13 @@ export function TopNavbar() {
         <div className="flex items-center gap-2">
           {/* Support Engineer Mode Switcher Slider */}
           {isSupportUser && (
-            <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border text-xs">
+            <div className="flex items-center gap-1 bg-muted p-1 rounded-xl border border-border text-xs">
               <button
                 type="button"
                 onClick={() => setRole("support")}
-                className={`px-2.5 py-1 rounded font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
                   role === "support"
-                    ? "bg-card text-foreground font-semibold shadow-soft border border-border"
+                    ? "bg-card text-primary font-semibold shadow-soft border border-primary/30"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -86,9 +92,9 @@ export function TopNavbar() {
               <button
                 type="button"
                 onClick={() => setRole("employee")}
-                className={`px-2.5 py-1 rounded font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
                   role === "employee"
-                    ? "bg-card text-foreground font-semibold shadow-soft border border-border"
+                    ? "bg-card text-primary font-semibold shadow-soft border border-primary/30"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -170,7 +176,7 @@ export function TopNavbar() {
                 <div className="border-t border-border pt-1">
                   <button
                     type="button"
-                    onClick={handleSignOut}
+                    onClick={handleSignOutClick}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors text-left"
                   >
                     <LogOut className="h-4 w-4" />
@@ -182,6 +188,13 @@ export function TopNavbar() {
           </div>
         </div>
       </div>
+
+      <ConfirmSignOutModal
+        open={signOutModalOpen}
+        onClose={() => setSignOutModalOpen(false)}
+        onConfirm={handleConfirmSignOut}
+        userName={displayName}
+      />
     </header>
   );
 }

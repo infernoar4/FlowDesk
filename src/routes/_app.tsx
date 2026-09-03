@@ -45,7 +45,7 @@ function AppLayoutWrapper() {
 
 function AppLayout() {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const { setRole } = useRole();
+  const { role, setRole } = useRole();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +67,13 @@ function AppLayout() {
     }
   }, [user?.role, setRole]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-role", role);
+    return () => {
+      document.documentElement.removeAttribute("data-role");
+    };
+  }, [role]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -85,7 +92,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-role={role}>
       <Sidebar />
       <div className="md:pl-64 flex flex-col min-h-screen">
         <TopNavbar />

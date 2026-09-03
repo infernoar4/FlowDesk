@@ -133,3 +133,80 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* ==========================================================================
+   DYNAMIC ROLE-BASED THEME PALETTES (FlowDesk Enterprise UI)
+   Scoped exclusively to application pages (does NOT affect login/signup)
+   ========================================================================== */
+
+/* --- 1. EMPLOYEE THEME (Royal Blue & Clean White / Black) --- */
+[data-role="employee"],
+html[data-role="employee"] {
+  --primary: oklch(0.55 0.22 250);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --primary-soft: oklch(0.95 0.03 250);
+  --ring: oklch(0.55 0.22 250);
+  --sidebar-active: oklch(0.55 0.22 250);
+}
+
+html.dark[data-role="employee"],
+[data-role="employee"].dark,
+.dark[data-role="employee"] {
+  --background: oklch(0.13 0.02 260);
+  --foreground: oklch(0.98 0.005 250);
+  --card: oklch(0.17 0.025 260);
+  --card-foreground: oklch(0.98 0.005 250);
+  --primary: oklch(0.62 0.22 250);
+  --primary-foreground: oklch(0.12 0.03 250);
+  --primary-soft: oklch(0.26 0.08 250);
+  --ring: oklch(0.62 0.22 250);
+  --sidebar-active: oklch(0.62 0.22 250);
+}
+
+/* --- 2. SUPPORT ENGINEER THEME (Electric Tech Violet / Indigo) --- */
+[data-role="support"],
+html[data-role="support"] {
+  --primary: oklch(0.56 0.22 285);
+  --primary-foreground: oklch(0.99 0.005 285);
+  --primary-soft: oklch(0.95 0.03 285);
+  --ring: oklch(0.56 0.22 285);
+  --sidebar-active: oklch(0.56 0.22 285);
+}
+
+html.dark[data-role="support"],
+[data-role="support"].dark,
+.dark[data-role="support"] {
+  --background: oklch(0.13 0.025 280);
+  --foreground: oklch(0.98 0.005 285);
+  --card: oklch(0.17 0.03 280);
+  --card-foreground: oklch(0.98 0.005 285);
+  --primary: oklch(0.68 0.22 285);
+  --primary-foreground: oklch(0.12 0.03 285);
+  --primary-soft: oklch(0.28 0.08 285);
+  --ring: oklch(0.68 0.22 285);
+  --sidebar-active: oklch(0.68 0.22 285);
+}
+
+/* --- 3. MANAGER / HR THEME (Gold / Amber - matching user screenshot) --- */
+[data-role="manager"],
+html[data-role="manager"] {
+  --primary: oklch(0.68 0.19 75);
+  --primary-foreground: oklch(0.99 0.005 75);
+  --primary-soft: oklch(0.95 0.04 75);
+  --ring: oklch(0.68 0.19 75);
+  --sidebar-active: oklch(0.68 0.19 75);
+}
+
+html.dark[data-role="manager"],
+[data-role="manager"].dark,
+.dark[data-role="manager"] {
+  --background: oklch(0.13 0.02 55);
+  --foreground: oklch(0.98 0.005 75);
+  --card: oklch(0.17 0.025 55);
+  --card-foreground: oklch(0.98 0.005 75);
+  --primary: oklch(0.75 0.19 75);
+  --primary-foreground: oklch(0.15 0.04 55);
+  --primary-soft: oklch(0.28 0.08 75);
+  --ring: oklch(0.75 0.19 75);
+  --sidebar-active: oklch(0.75 0.19 75);
+}
