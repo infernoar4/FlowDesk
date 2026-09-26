@@ -41,6 +41,13 @@
             <scope>runtime</scope>
         </dependency>
         
+        <!-- PostgreSQL Driver (for Neon DB / PostgreSQL) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
         <!-- Spring Boot DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
